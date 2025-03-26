@@ -2,7 +2,7 @@ import AppBar from "../components/AppBar"
 import { Box, Button, FileUpload, Text } from "@chakra-ui/react"
 import Invoice from '../assets/image/Invoice.png'
 import MMTHOrder from '../assets/image/MMTHOrder.png'
-import MMTHRecieve from '../assets/image/MMTHOrder.png'
+import MMTHRecieve from '../assets/image/MMTHRecieve.png'
 import { useState } from "react"
 
 const UploadPage = () => {
