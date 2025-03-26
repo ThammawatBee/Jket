@@ -1,6 +1,6 @@
 import { Box, Text } from '@chakra-ui/react';
-import Logo from '../assets/image/logo.jpg'
 import { Link, useLocation } from "react-router-dom"
+import AppBarLogo from '../assets/image/AppBar-logo.jpg'
 
 const AppBar = () => {
   const location = useLocation();
@@ -9,7 +9,7 @@ const AppBar = () => {
     return <Box bg={location.pathname === pathname ? '#1A69AA' : '#373535'} p={'4'}><Text fontWeight={location.pathname === pathname ? 'bold' : 'normal'}>{text}</Text></Box>
   }
   return <Box bg='#373535' width="100%" color="white" display='flex' alignItems='center'>
-    <img src={Logo} style={{ height: "55px", width: "125px" }} />
+    <img src={AppBarLogo} style={{ height: "55px", width: "125px" }} />
     <Box marginRight='20px'>
       <Link to="/upload">{renderTabText('/upload', 'Upload')}</Link>
     </Box>
