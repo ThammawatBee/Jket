@@ -14,6 +14,7 @@ export const ReceiveMapper = (data: any) => {
     workGroup: data["Work Group"] || null,
     poNo: data["Po No"] || null,
     materialName: data["Material Name"],
+    materialNo: data["Material No"],
     poQty: +data["PO Qty."],
     receiveQty: +data["Received Qty."],
     receiveArea: data["Receive Area"],

@@ -1,5 +1,5 @@
 import AppBar from "../components/AppBar"
-import { Box, Field, Input, NativeSelect, Text } from "@chakra-ui/react"
+import { Box, Field, Input, NativeSelect, Table, Text } from "@chakra-ui/react"
 import DatePicker from "react-datepicker"
 import { useState } from "react";
 

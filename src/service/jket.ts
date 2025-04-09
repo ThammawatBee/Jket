@@ -1,5 +1,6 @@
 import { CreateDeliveryReport, CreateReport, CreateInvoiceReport } from "@/interface/Report";
 import axiosInstance from "./axios";
+import type { DeliveryReport, Report } from '../interface/Report'
 
 export const createReports = async (reports: CreateReport[]) => {
   const response = await axiosInstance.post(`/report`, { reports });
@@ -14,4 +15,20 @@ export const createDeliveryReports = async (deliveryReports: CreateDeliveryRepor
 export const uploadInvoice = async (invoiceReports: CreateInvoiceReport[]) => {
   const response = await axiosInstance.post(`/invoice`, { invoiceReports });
   return response;
+}
+
+export const listReports = async () => {
+  const response = await axiosInstance.get(`/reports`);
+  return response as unknown as { reports: Report[] };
+}
+
+export const listDeliveryReports = async () => {
+  const response = await axiosInstance.get(`/deliveries`);
+  return response as unknown as { deliveryReports: DeliveryReport[] };
+}
+
+
+export const mergeWithDeliveryFile = async () => {
+  const response = await axiosInstance.post(`/merge-delivery-report`);
+  return response
 }

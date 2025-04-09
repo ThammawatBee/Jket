@@ -8,6 +8,7 @@ import { useState } from "react"
 import * as XLSX from 'xlsx';
 import { DeliveryMapper, InvoiceMapper, ReceiveMapper } from "../helper/mapFileData"
 import { createDeliveryReports, createReports, uploadInvoice } from "../service/jket"
+import { toast } from "react-toastify"
 
 const UploadPage = () => {
   const [section, setSection] = useState("init")
@@ -50,7 +51,20 @@ const UploadPage = () => {
           }
 
         },
-        complete: () => console.log('All chunks uploaded!'),
+        complete: () => {
+          console.log('All chunks uploaded!')
+          toast.success(type === 'report' ? 'Upload Receive success' : 'Upload Invoice success', {
+            style: { color: '#18181B' },
+            position: "top-right",
+            autoClose: 3500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+        },
       });
     };
 
@@ -64,6 +78,17 @@ const UploadPage = () => {
       const content = event.target?.result as string;
       const data = DeliveryMapper(content)
       await createDeliveryReports(data)
+      toast.success('Upload Delivery success', {
+        style: { color: '#18181B' },
+        position: "top-right",
+        autoClose: 3500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     };
 
     reader.readAsText(file);
@@ -79,7 +104,7 @@ const UploadPage = () => {
             <Text textStyle={'xl'} color={'#1A69AA'}>MMTH Receive file</Text>
           </Box>
           <Box>
-            <FileUpload.Root accept={['.xls','.xlsx']} onFileChange={async (file) => {
+            <FileUpload.Root accept={['.xls', '.xlsx']} onFileChange={async (file) => {
               if (file.acceptedFiles?.[0]) {
                 handleUploadXlsFile(file.acceptedFiles?.[0], "report")
               }
@@ -104,7 +129,7 @@ const UploadPage = () => {
             <Text textStyle={'xl'} color={'#1A69AA'}>Invoice</Text>
           </Box>
           <Box>
-            <FileUpload.Root accept={['.xls','.xlsx']} onFileChange={async (file) => {
+            <FileUpload.Root accept={['.xls', '.xlsx']} onFileChange={async (file) => {
               if (file.acceptedFiles?.[0]) {
                 handleUploadXlsFile(file.acceptedFiles?.[0], "invoice")
               }

@@ -6,10 +6,12 @@ import MonthlyReport from "./pages/MonthlyReport";
 import MMTHOrder from "./pages/MMTHOrder";
 import MMTHBilling from "./pages/MMTHBilling";
 import UserManagement from "./pages/UserManagement";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
     <Box>
+      <ToastContainer />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/upload" element={<UploadPage />} />
