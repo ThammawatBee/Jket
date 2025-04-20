@@ -101,3 +101,23 @@ export interface Report {
   deliveryPrivilegeFlag: string | null, // delivery
   deliveryReferenceNoTag: string | null, // delivery
 }
+
+export interface ListReportOptions {
+  offset?: number
+  limit?: number
+  monthly?: string
+}
+
+export interface ListDeliveryReportOptions {
+  dateStart?: string
+  dateEnd?: string
+  offset?: number
+  limit?: number
+}
+
+export interface ListUserOptions {
+  username?: string
+  name?: string
+  offset?: number
+  limit?: number
+}
