@@ -1,11 +1,12 @@
 import AppBar from "../components/AppBar"
-import { Box, Button, FileUpload, Icon, Text } from "@chakra-ui/react"
+import { Box, Button, FileUpload, Icon, Text, useFileUpload, useFileUploadContext } from "@chakra-ui/react"
 import Invoice from '../assets/image/Invoice.png'
 import MMTHOrder from '../assets/image/MMTHOrder.png'
 import MMTHRecieve from '../assets/image/MMTHRecieve.png'
 import Papa from 'papaparse';
 import { useState } from "react"
 import * as XLSX from 'xlsx';
+import unionBy from 'lodash/unionBy'
 import { DeliveryMapper, InvoiceMapper, ReceiveMapper } from "../helper/mapFileData"
 import { createDeliveryReports, createReports, uploadInvoice } from "../service/jket"
 import { toast } from "react-toastify"
@@ -17,6 +18,7 @@ const UploadPage = () => {
   const [receiveFiles, setReceiveFiles] = useState<File[]>([])
   const [invoiceFiles, setInvoiceFiles] = useState<File[]>([])
   const [deliveryReportFiles, setDeliveryReportFiles] = useState<File[]>([])
+  const fileUpload = useFileUpload({})
 
 
   const handleUploadXlsFile = (file: File, type: string) => {
@@ -73,7 +75,7 @@ const UploadPage = () => {
         },
         complete: () => {
           if (!isUploadError) {
-            toast.success(type === 'report' ? 'Upload Receive success' : 'Upload Invoice success', {
+            toast.success(type === 'report' ? `Upload Receive ${file.name} success` : `Upload Invoice ${file.name} success`, {
               style: { color: '#18181B' },
               position: "top-right",
               autoClose: 3500,
@@ -87,9 +89,9 @@ const UploadPage = () => {
             isUploadError = false
             isCheckHeader = false
             if (type === 'report') {
-              setReceiveFiles([])
+              setReceiveFiles(receiveFiles.filter(receiveFile => receiveFile.name !== file.name))
             } else {
-              setInvoiceFiles([])
+              setInvoiceFiles(invoiceFiles.filter(invoiceFile => file.name !== invoiceFile.name))
             }
           }
         },
@@ -125,7 +127,7 @@ const UploadPage = () => {
       const data = DeliveryMapper(content)
       try {
         await createDeliveryReports(data)
-        toast.success('Upload Delivery success', {
+        toast.success(`Upload Delivery ${file.name} success`, {
           style: { color: '#18181B' },
           position: "top-right",
           autoClose: 3500,
@@ -136,6 +138,7 @@ const UploadPage = () => {
           progress: undefined,
           theme: "light",
         })
+        setDeliveryReportFiles(deliveryReportFiles.filter(deliveryReportFile => deliveryReportFile.name !== file.name))
       } catch (error: any) {
         let errorMessage = ''
         if (error?.data?.detail) {
@@ -153,14 +156,14 @@ const UploadPage = () => {
 
     reader.readAsText(file);
   }
+
   const renderSection = () => {
     if (section === "receiveFile") {
       return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
         <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
         <FileUpload.Root maxFiles={10} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
           if (file.acceptedFiles?.length) {
-            //handleUploadXlsFile(file.acceptedFiles?.[0], "report")
-            setReceiveFiles(file.acceptedFiles)
+            setReceiveFiles(unionBy(file.acceptedFiles, "name"))
           }
         }}>
           <Box marginTop={'25px'} display='flex' justifyContent='space-between' width="100%">
@@ -188,13 +191,27 @@ const UploadPage = () => {
               </FileUpload.DropzoneContent>
             </FileUpload.Dropzone>
           </Box>
-          <FileUpload.List clearable />
+          {
+            receiveFiles.length ? receiveFiles.map(receiveFile =>
+              <FileUpload.Item key={receiveFile.name} file={receiveFile}>
+                <FileUpload.ItemPreview />
+                <FileUpload.ItemName />
+                <FileUpload.ItemDeleteTrigger marginLeft={"auto"}
+                  onClick={() => {
+                    setReceiveFiles(receiveFiles.filter(file => file.name !== receiveFile.name))
+                  }}
+                />
+              </FileUpload.Item>
+            )
+              : null
+          }
         </FileUpload.Root>
         <Box>
-          <Button variant="solid" onClick={async () => {
+          <Button variant="solid" marginTop={"20px"} disabled={receiveFiles.length === 0} onClick={async () => {
             for (const file of receiveFiles) {
               handleUploadXlsFile(file, "report")
             }
+
           }}>Confirm Upload</Button>
         </Box>
       </Box>
@@ -204,7 +221,7 @@ const UploadPage = () => {
         <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
         <FileUpload.Root maxFiles={10} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
           if (file.acceptedFiles?.length) {
-            setInvoiceFiles(file.acceptedFiles)
+            setInvoiceFiles(unionBy(file.acceptedFiles, "name"))
           }
         }}>
           <Box marginTop={'25px'} display='flex' justifyContent='space-between' width="100%">
@@ -232,10 +249,23 @@ const UploadPage = () => {
               </FileUpload.DropzoneContent>
             </FileUpload.Dropzone>
           </Box>
-          <FileUpload.List clearable />
+          {
+            invoiceFiles.length ? invoiceFiles.map(invoiceFile =>
+              <FileUpload.Item key={invoiceFile.name} file={invoiceFile}>
+                <FileUpload.ItemPreview />
+                <FileUpload.ItemName />
+                <FileUpload.ItemDeleteTrigger marginLeft={"auto"}
+                  onClick={() => {
+                    setInvoiceFiles(invoiceFiles.filter(file => file.name !== invoiceFile.name))
+                  }}
+                />
+              </FileUpload.Item>
+            )
+              : null
+          }
         </FileUpload.Root>
         <Box>
-          <Button variant="solid" onClick={async () => {
+          <Button variant="solid" marginTop={"20px"} disabled={invoiceFiles.length === 0} onClick={async () => {
             for (const file of invoiceFiles) {
               handleUploadXlsFile(file, "invoice")
             }
@@ -248,7 +278,7 @@ const UploadPage = () => {
         <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
         <FileUpload.Root accept={'.txt'} onFileChange={async (file) => {
           if (file.acceptedFiles?.length) {
-            setDeliveryReportFiles(file.acceptedFiles)
+            setDeliveryReportFiles(unionBy(file.acceptedFiles, "name"))
           }
         }}>
           <Box marginTop={'25px'} display='flex' justifyContent='space-between' width="100%">
@@ -276,10 +306,23 @@ const UploadPage = () => {
               </FileUpload.DropzoneContent>
             </FileUpload.Dropzone>
           </Box>
-          <FileUpload.List clearable />
+          {
+            deliveryReportFiles.length ? deliveryReportFiles.map(deliveryReportFile =>
+              <FileUpload.Item key={deliveryReportFile.name} file={deliveryReportFile}>
+                <FileUpload.ItemPreview />
+                <FileUpload.ItemName />
+                <FileUpload.ItemDeleteTrigger marginLeft={"auto"}
+                  onClick={() => {
+                    setDeliveryReportFiles(deliveryReportFiles.filter(file => file.name !== deliveryReportFile.name))
+                  }}
+                />
+              </FileUpload.Item>
+            )
+              : null
+          }
         </FileUpload.Root>
         <Box>
-          <Button variant="solid" onClick={async () => {
+          <Button variant="solid" marginTop={"20px"} disabled={deliveryReportFiles.length === 0} onClick={async () => {
             for (const file of deliveryReportFiles) {
               handleUploadTxtFile(file)
             }
@@ -322,7 +365,11 @@ const UploadPage = () => {
 
   return <Box>
     <AppBar />
-    {renderSection()}
+    <FileUpload.RootProvider value={fileUpload}>
+      <Box width={"100%"}>
+        {renderSection()}
+      </Box>
+    </FileUpload.RootProvider>
   </Box>
 }
 

@@ -2,6 +2,17 @@ import { CreateDeliveryReport, CreateReport, CreateInvoiceReport } from "@/inter
 import axiosInstance from "./axios";
 import type { DeliveryReport, ListDeliveryReportOptions, ListReportOptions, ListUserOptions, Report } from '../interface/Report'
 import { CreateUser, User } from "../interface/User";
+import { LoginPayload, Profile } from "../interface/Auth";
+
+export const login = async (payload: LoginPayload) => {
+  const response = await axiosInstance.post('/auth/login', { ...payload })
+  return response as unknown as { access_token: string }
+}
+
+export const getProfile = async () => {
+  const response = await axiosInstance.get('/auth/me')
+  return response as unknown as Profile
+}
 
 export const createReports = async (reports: CreateReport[]) => {
   const response = await axiosInstance.post(`/report`, { reports });

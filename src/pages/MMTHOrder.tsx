@@ -19,7 +19,7 @@ const MMTHOrder = () => {
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
-      <Box display='flex' justifyContent='space-between'>
+      <Box display='flex' justifyContent='space-between' alignItems={'end'}>
         <Box>
           <Text marginBottom={"20px"} textStyle={'xl'} color={'#1A69AA'} fontWeight='bold'>MMTH Order</Text>
           <DatePicker
