@@ -1,10 +1,19 @@
 import UserDialog from "../components/UserDialog"
 import AppBar from "../components/AppBar"
-import { Box, Button, Table, Text } from "@chakra-ui/react"
-import { useState } from "react"
+import { Box, Button, ButtonGroup, IconButton, Pagination, Table, Text } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
+import useUserStore from "../store/userStore"
+import PageSizeSelect from "../components/PageSizeSelect"
+import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
 const UserManagement = () => {
   const [openModal, setOpenModal] = useState(false)
+  const { users, limit, onPageSizeChange, onPageChange, offset, count, search, setSearch, fetchUsers } = useUserStore()
+  useEffect(() => {
+    if (!users) {
+      fetchUsers()
+    }
+  }, [])
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -20,15 +29,60 @@ const UserManagement = () => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          <Table.Row>
-            <Table.Cell>65025</Table.Cell>
-            <Table.Cell>Mr.A</Table.Cell>
-            <Table.Cell>A</Table.Cell>
-            <Table.Cell>Admin</Table.Cell>
-            <Table.Cell><Button background='#002060'>Reset Password</Button></Table.Cell>
-          </Table.Row>
+          {
+            users?.length ? users.slice(offset * limit, (offset + 1) * limit).map(user =>
+              <Table.Row>
+                <Table.Cell>{user.username}</Table.Cell>
+                <Table.Cell>{user.name}</Table.Cell>
+                <Table.Cell>{user.division}</Table.Cell>
+                <Table.Cell>{user.role}</Table.Cell>
+                <Table.Cell><Button background='#002060'>Reset Password</Button></Table.Cell>
+              </Table.Row>
+            ) : null
+          }
         </Table.Body>
       </Table.Root>
+      {users?.length ? <Box mt={'15px'} mb={'15px'} display='flex' justifyContent={'space-between'}>
+        <Box display={'flex'} fontSize={'14px'} alignItems={'center'}>
+          Row per page
+          <Box ml={"15px"} width={'50px'}>
+            <PageSizeSelect limit={limit} onChangePageSize={async (pageSize: number) => {
+              await onPageSizeChange(pageSize)
+            }} />
+          </Box>
+          <Box ml={"15px"}>
+            {(offset * limit) + 1} - {count < (limit * (offset + 1)) ? count : (limit * (offset + 1))} of {count}
+          </Box>
+        </Box>
+        <Pagination.Root
+          count={count}
+          pageSize={limit}
+          page={offset + 1}
+          onPageChange={async (details: { page: number, pageSize: number }) => {
+            await onPageChange(details.page)
+          }}
+        >
+          <ButtonGroup variant="ghost">
+            <Pagination.PrevTrigger asChild>
+              <IconButton>
+                <LuChevronLeft />
+              </IconButton>
+            </Pagination.PrevTrigger>
+            <Pagination.Items
+              render={(page) => (
+                <IconButton variant={{ base: "ghost", _selected: "solid" }}>
+                  {page.value}
+                </IconButton>
+              )}
+            />
+            <Pagination.NextTrigger asChild>
+              <IconButton>
+                <LuChevronRight />
+              </IconButton>
+            </Pagination.NextTrigger>
+          </ButtonGroup>
+        </Pagination.Root>
+      </Box> : <Box height={'75px'} />}
       <Box marginTop="20px" display='flex' justifyContent='flex-end'>
         <Button background={'#385723'} onClick={() => setOpenModal(true)}>Add new User</Button>
       </Box>

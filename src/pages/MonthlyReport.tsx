@@ -1,24 +1,22 @@
 import AppBar from "../components/AppBar"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
-import { Box, Button, Input, Table, Text } from "@chakra-ui/react"
-import { useEffect, useState } from "react";
+import { Box, Button, ButtonGroup, IconButton, Input, Pagination, Table, Text } from "@chakra-ui/react"
+import { useEffect } from "react";
 import { DateTime } from "luxon";
-import { listReports, mergeWithDeliveryFile } from "../service/jket";
-import type { Report } from '../interface/Report'
+import { exportReports, mergeWithDeliveryFile } from "../service/jket";
 import { toast } from "react-toastify";
+import useReportStore from "../store/reportStore";
+import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
+import PageSizeSelect from "../components/PageSizeSelect";
 
 const MonthlyReport = () => {
-  const [monthly, setMonthly] = useState(new Date())
-  const [reports, setReport] = useState<Report[] | null>(null)
-  const init = async () => {
-    const data = await listReports()
-    setReport(data.reports)
-  }
+  const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count } = useReportStore()
   useEffect(() => {
-    init()
+    if (!reports) {
+      fetchReports()
+    }
   }, [])
-
   const mergeWithDelivery = async () => {
     await mergeWithDeliveryFile()
     toast.success('Merge with Delivery file success', {
@@ -32,9 +30,8 @@ const MonthlyReport = () => {
       progress: undefined,
       theme: "light",
     });
-    init()
+    await fetchReports({ reset: true })
   }
-
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -47,6 +44,7 @@ const MonthlyReport = () => {
             onChange={(date) => {
               if (date) {
                 setMonthly(date)
+                fetchReports({ reset: true })
               }
             }}
             dateFormat="MM/yyyy"
@@ -58,7 +56,16 @@ const MonthlyReport = () => {
         </Box>
         <Box display='flex' flexDirection='column'>
           <Button bg='#002060' fontWeight='bold' onClick={() => { mergeWithDelivery() }}>Match with  MMTH order</Button>
-          <Button bg='#385723' marginTop='20px' fontWeight='bold'>Export as Excel</Button>
+          <Button bg='#385723' marginTop='20px' fontWeight='bold' onClick={async () => {
+            const response = await exportReports({ monthly: DateTime.fromJSDate(monthly).toFormat('MM/yyyy') })
+            const url = window.URL.createObjectURL(new Blob([response as any]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'reports.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          }}>Export as Excel</Button>
         </Box>
       </Box>
       <Box marginTop={'25px'}>
@@ -107,7 +114,7 @@ const MonthlyReport = () => {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {reports?.length ? reports.map(report =>
+              {reports?.length ? reports.slice(offset * limit, (offset + 1) * limit).map(report =>
                 <Table.Row key={report.id}>
                   <Table.Cell>{report.plantCode}</Table.Cell>
                   <Table.Cell>{report.venderCode}</Table.Cell>
@@ -151,6 +158,47 @@ const MonthlyReport = () => {
             </Table.Body>
           </Table.Root>
         </Table.ScrollArea>
+        {reports?.length ? <Box mt={'15px'} mb={'15px'} display='flex' justifyContent={'space-between'}>
+          <Box display={'flex'} fontSize={'14px'} alignItems={'center'}>
+            Row per page
+            <Box ml={"15px"} width={'50px'}>
+              <PageSizeSelect limit={limit} onChangePageSize={async (pageSize: number) => {
+                await onPageSizeChange(pageSize)
+              }} />
+            </Box>
+            <Box ml={"15px"}>
+              {(offset * limit) + 1} - {count < (limit * (offset + 1)) ? count : (limit * (offset + 1))} of {count}
+            </Box>
+          </Box>
+          <Pagination.Root
+            count={count}
+            pageSize={limit}
+            page={offset + 1}
+            onPageChange={async (details: { page: number, pageSize: number }) => {
+              await onPageChange(details.page)
+            }}
+          >
+            <ButtonGroup variant="ghost">
+              <Pagination.PrevTrigger asChild>
+                <IconButton>
+                  <LuChevronLeft />
+                </IconButton>
+              </Pagination.PrevTrigger>
+              <Pagination.Items
+                render={(page) => (
+                  <IconButton variant={{ base: "ghost", _selected: "solid" }}>
+                    {page.value}
+                  </IconButton>
+                )}
+              />
+              <Pagination.NextTrigger asChild>
+                <IconButton>
+                  <LuChevronRight />
+                </IconButton>
+              </Pagination.NextTrigger>
+            </ButtonGroup>
+          </Pagination.Root>
+        </Box> : <Box height={'75px'} />}
       </Box>
     </Box>
   </Box>

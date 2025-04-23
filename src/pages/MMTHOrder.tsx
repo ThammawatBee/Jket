@@ -1,27 +1,25 @@
 import AppBar from "../components/AppBar"
-import { Box, Button, Input, Table, Text } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, IconButton, Input, Pagination, Table, Text } from "@chakra-ui/react"
 import DatePicker from "react-datepicker"
-import { useEffect, useState } from "react";
-import { DeliveryReport } from "../interface/Report";
-import { listDeliveryReports } from "../service/jket";
+import { useEffect } from "react";
+import useDeliveryStore, { generateParam } from "../store/deliveryStore";
+import PageSizeSelect from "../components/PageSizeSelect";
+import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { DateTime } from "luxon";
+import { exportDeliveryReports } from "../service/jket";
 
 const MMTHOrder = () => {
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
-  const [deliveryReports, setDeliveryReports] = useState<DeliveryReport[] | null>(null)
-
-  const init = async () => {
-    const data = await listDeliveryReports()
-    setDeliveryReports(data.deliveryReports)
-  }
+  const { deliveryReports, fetchDeliveryReports, search, offset, count, limit, onPageChange, onPageSizeChange, setSearch } = useDeliveryStore()
   useEffect(() => {
-    init()
+    if (!deliveryReports) {
+      fetchDeliveryReports()
+    }
   }, [])
 
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
-      <Box display='flex' justifyContent='space-between'>
+      <Box display='flex' justifyContent='space-between' alignItems={'end'}>
         <Box>
           <Text marginBottom={"20px"} textStyle={'xl'} color={'#1A69AA'} fontWeight='bold'>MMTH Order</Text>
           <DatePicker
@@ -31,13 +29,17 @@ const MMTHOrder = () => {
             isClearable
             onChange={(dates) => {
               const [start, end] = dates
-              setStartDate(start)
-              setEndDate(end)
-              // setSearch({ resultDateStart: start, resultDateEnd: end })
+              setSearch({
+                dateStart: start,
+                dateEnd: end
+              })
+              if (start && end) {
+                fetchDeliveryReports({ reset: true })
+              }
             }}
             selectsRange={true}
-            startDate={startDate}
-            endDate={endDate}
+            startDate={search.dateStart}
+            endDate={search.dateEnd}
             onKeyDown={(e) => e.preventDefault()}
             customInput={<Input
               width={'240px'}
@@ -46,7 +48,18 @@ const MMTHOrder = () => {
           />
         </Box>
         <Box display='flex' flexDirection='column'>
-          <Button bg='#385723' marginTop='20px' fontWeight='bold'>Export as Excel</Button>
+          <Button bg='#385723' marginTop='20px' fontWeight='bold'
+            onClick={async () => {
+              const response = await exportDeliveryReports(generateParam(search))
+              const url = window.URL.createObjectURL(new Blob([response as any]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', 'reports.xlsx');
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+            }}
+          >Export as Excel</Button>
         </Box>
       </Box>
       <Box marginTop={'25px'}>
@@ -68,11 +81,11 @@ const MMTHOrder = () => {
           </Table.Header>
           <Table.Body>{
             deliveryReports?.length ?
-              deliveryReports.map(deliveryReport => <Table.Row key={deliveryReport.id}>
+              deliveryReports.slice(offset * limit, (offset + 1) * limit).map(deliveryReport => <Table.Row key={deliveryReport.id}>
                 <Table.Cell>{deliveryReport.venderCode}</Table.Cell>
                 <Table.Cell>{deliveryReport.plantCode}</Table.Cell>
                 <Table.Cell>{deliveryReport.deliveryNo}</Table.Cell>
-                <Table.Cell>{deliveryReport.deliveryDate}</Table.Cell>
+                <Table.Cell>{DateTime.fromISO(deliveryReport.deliveryDate).toFormat('dd/MM/yyyy')}</Table.Cell>
                 <Table.Cell>{deliveryReport.partNo}</Table.Cell>
                 <Table.Cell>{+deliveryReport.qty}</Table.Cell>
                 <Table.Cell>{deliveryReport.receiveArea}</Table.Cell>
@@ -83,6 +96,47 @@ const MMTHOrder = () => {
               </Table.Row>)
               : null}</Table.Body>
         </Table.Root>
+        {deliveryReports?.length ? <Box mt={'15px'} mb={'15px'} display='flex' justifyContent={'space-between'}>
+          <Box display={'flex'} fontSize={'14px'} alignItems={'center'}>
+            Row per page
+            <Box ml={"15px"} width={'50px'}>
+              <PageSizeSelect limit={limit} onChangePageSize={async (pageSize: number) => {
+                await onPageSizeChange(pageSize)
+              }} />
+            </Box>
+            <Box ml={"15px"}>
+              {(offset * limit) + 1} - {count < (limit * (offset + 1)) ? count : (limit * (offset + 1))} of {count}
+            </Box>
+          </Box>
+          <Pagination.Root
+            count={count}
+            pageSize={limit}
+            page={offset + 1}
+            onPageChange={async (details: { page: number, pageSize: number }) => {
+              await onPageChange(details.page)
+            }}
+          >
+            <ButtonGroup variant="ghost">
+              <Pagination.PrevTrigger asChild>
+                <IconButton>
+                  <LuChevronLeft />
+                </IconButton>
+              </Pagination.PrevTrigger>
+              <Pagination.Items
+                render={(page) => (
+                  <IconButton variant={{ base: "ghost", _selected: "solid" }}>
+                    {page.value}
+                  </IconButton>
+                )}
+              />
+              <Pagination.NextTrigger asChild>
+                <IconButton>
+                  <LuChevronRight />
+                </IconButton>
+              </Pagination.NextTrigger>
+            </ButtonGroup>
+          </Pagination.Root>
+        </Box> : <Box height={'75px'} />}
       </Box>
     </Box>
   </Box>
