@@ -5,6 +5,8 @@ import { useEffect, useState } from "react"
 import useUserStore from "../store/userStore"
 import PageSizeSelect from "../components/PageSizeSelect"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
+import { resetInitialPassword } from "../service/jket"
+import SuccessToast from "../components/SuccessToast"
 
 const UserManagement = () => {
   const [openModal, setOpenModal] = useState(false)
@@ -14,6 +16,11 @@ const UserManagement = () => {
       fetchUsers()
     }
   }, [])
+  const onResetPassword = async (userId: string, username: string) => {
+    await resetInitialPassword(userId)
+    SuccessToast(`Reset password ${username} success`)
+  }
+
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -36,7 +43,9 @@ const UserManagement = () => {
                 <Table.Cell>{user.name}</Table.Cell>
                 <Table.Cell>{user.division}</Table.Cell>
                 <Table.Cell>{user.role}</Table.Cell>
-                <Table.Cell><Button background='#002060'>Reset Password</Button></Table.Cell>
+                <Table.Cell><Button background='#002060' onClick={async () => {
+                  await onResetPassword(user.id, user.name)
+                }}>Reset Password</Button></Table.Cell>
               </Table.Row>
             ) : null
           }

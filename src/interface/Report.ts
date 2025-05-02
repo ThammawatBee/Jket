@@ -102,6 +102,10 @@ export interface Report {
   deliveryReferenceNoTag: string | null, // delivery
 }
 
+export interface Billing {
+  invoice_invoice_no: number
+}
+
 export interface ListReportOptions {
   offset?: number
   limit?: number
@@ -118,6 +122,13 @@ export interface ListDeliveryReportOptions {
 export interface ListUserOptions {
   username?: string
   name?: string
+  offset?: number
+  limit?: number
+}
+
+export interface ListBillingOptions {
+  startDate?: string
+  endDate?: string
   offset?: number
   limit?: number
 }

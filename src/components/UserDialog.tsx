@@ -4,24 +4,12 @@ import { useFormik } from "formik"
 import { toast } from "react-toastify"
 import { ServiceError } from "../interface/Error"
 import useUserStore from "../store/userStore";
+import SuccessToast from "./SuccessToast";
 interface UserDialogProps {
   isOpenDialog: boolean
   setOpenDialog: (value: boolean) => void
 }
 
-const successToast = (message: string) => {
-  toast.success(message, {
-    style: { color: '#18181B' },
-    position: "top-right",
-    autoClose: 3500,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-  });
-}
 
 const UserDialog = ({ isOpenDialog, setOpenDialog }: UserDialogProps) => {
   const { createUser } = useUserStore()
@@ -44,7 +32,7 @@ const UserDialog = ({ isOpenDialog, setOpenDialog }: UserDialogProps) => {
         await createUser({
           ...value,
         })
-        successToast("Create equipment success")
+        SuccessToast("Create equipment success")
         setOpenDialog(false)
       } catch (error: any) {
         const errorData = error.data as ServiceError
