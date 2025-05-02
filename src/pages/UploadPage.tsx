@@ -276,7 +276,7 @@ const UploadPage = () => {
     else if (section === 'orderFile') {
       return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
         <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
-        <FileUpload.Root accept={'.txt'} onFileChange={async (file) => {
+        <FileUpload.Root maxFiles={10} accept={'.txt'} onFileChange={async (file) => {
           if (file.acceptedFiles?.length) {
             setDeliveryReportFiles(unionBy(file.acceptedFiles, "name"))
           }
