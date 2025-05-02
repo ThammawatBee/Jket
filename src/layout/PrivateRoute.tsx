@@ -32,9 +32,9 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const isRefreshTokenNearExpiry = () => {
     const expiresAt = localStorage.getItem('expiresAt');
     if (!expiresAt) return false;
-
-    const timeLeft = parseInt(expiresAt, 10) - Date.now();
-    return timeLeft < 5 * 60 * 1000; // 5 minutes
+    const currentUnix = Math.floor(Date.now() / 1000);
+    const timeLeft = parseInt(expiresAt, 10) - currentUnix
+    return timeLeft < 5 * 60; // 5 minutes
   };
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
       if (isRefreshTokenNearExpiry()) {
         setOpenRefreshTokenDialog(true)
       }
-    }, 2 * 60 * 1000); // Check every 2 minutes
+    }, 1 * 60 * 1000); // Check every 1 minutes
 
     return () => clearInterval(interval);
   }, []);
