@@ -24,6 +24,7 @@ const LoginPage = () => {
           ...value,
         })
         localStorage.setItem('accessToken', response.access_token)
+        localStorage.setItem('expiresAt', response.expiresAt.toString())
         navigate("/upload")
         toast.success("Login success", {
           style: { color: '#18181B' },

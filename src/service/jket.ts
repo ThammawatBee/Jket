@@ -1,12 +1,17 @@
 import { CreateDeliveryReport, CreateReport, CreateInvoiceReport } from "@/interface/Report";
 import axiosInstance from "./axios";
-import type { DeliveryReport, ListDeliveryReportOptions, ListReportOptions, ListUserOptions, Report } from '../interface/Report'
+import type { Billing, DeliveryReport, ListBillingOptions, ListDeliveryReportOptions, ListReportOptions, ListUserOptions, Report } from '../interface/Report'
 import { CreateUser, User } from "../interface/User";
 import { LoginPayload, Profile } from "../interface/Auth";
 
 export const login = async (payload: LoginPayload) => {
   const response = await axiosInstance.post('/auth/login', { ...payload })
-  return response as unknown as { access_token: string }
+  return response as unknown as { access_token: string, expiresAt: number }
+}
+
+export const extendAuth = async () => {
+  const response = await axiosInstance.post('/auth/extend')
+  return response as unknown as { access_token: string, expiresAt: number }
 }
 
 export const getProfile = async () => {
@@ -68,4 +73,27 @@ export const createUser = async (data: CreateUser) => {
 export const listUsers = async (options: ListUserOptions) => {
   const response = await axiosInstance.get(`/users`, { params: options });
   return response as unknown as { users: User[], count: number };
+}
+
+export const resetPassword = async (password: string) => {
+  const response = await axiosInstance.patch(`/users/reset-password`, { password });
+  return response
+}
+
+export const resetInitialPassword = async (userId: string) => {
+  const response = await axiosInstance.patch(`/users/reset-initial-password`, { userId });
+  return response
+}
+
+
+export const listBilling = async (options: ListBillingOptions) => {
+  const response = await axiosInstance.get(`/billing`, { params: options });
+  return response as unknown as { billings: Billing[], count: number };
+}
+
+export const exportBilling = async (billings: string[], type: string) => {
+  const response = await axiosInstance.post(`/billing/export`,
+    { billings, type },
+    { responseType: 'blob', });
+  return response
 }

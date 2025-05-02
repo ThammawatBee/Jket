@@ -4,5 +4,8 @@ export interface LoginPayload {
 }
 
 export interface Profile {
-  id: string, username: string, role: string
+  id: string,
+  username: string,
+  role: string,
+  requirePasswordReset: boolean
 }

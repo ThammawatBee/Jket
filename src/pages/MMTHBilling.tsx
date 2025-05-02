@@ -1,12 +1,22 @@
 import AppBar from "../components/AppBar"
-import { Box, Field, Input, NativeSelect, Table, Text } from "@chakra-ui/react"
+import { Box, Button, Checkbox, Field, Input, NativeSelect, Table, Text } from "@chakra-ui/react"
 import DatePicker from "react-datepicker"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import useBillingStore from "../store/billingStore";
+import { exportBilling } from "../service/jket";
+import { isEmpty, keys, pickBy } from "lodash";
 
 const MMTHOrder = () => {
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
+  const { billings, fetchBilling, search, offset, count, limit, onPageChange, onPageSizeChange, setSearch } = useBillingStore()
   const [status, setStatus] = useState('all')
+  const [selectBilling, setSelectBilling] = useState<{ [key: string]: boolean }>({})
+  useEffect(() => {
+    if (!billings) {
+      fetchBilling()
+    }
+  }, [])
+  console.log('billings', billings)
+
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -22,13 +32,11 @@ const MMTHOrder = () => {
               isClearable
               onChange={(dates) => {
                 const [start, end] = dates
-                setStartDate(start)
-                setEndDate(end)
-                // setSearch({ resultDateStart: start, resultDateEnd: end })
+                setSearch({ startDate: start, endDate: end })
               }}
               selectsRange={true}
-              startDate={startDate}
-              endDate={endDate}
+              startDate={search?.startDate}
+              endDate={search?.endDate}
               onKeyDown={(e) => e.preventDefault()}
               customInput={<Input
                 width={'240px'}
@@ -54,6 +62,68 @@ const MMTHOrder = () => {
           </Field.Root>
         </Box>
       </Box>
+      <Box marginTop="20px" display='fex' flexWrap='wrap'>
+        {
+          billings?.length ? billings.map(billing =>
+            <Box width={'20%'} marginTop="10px">
+              <Checkbox.Root size={'md'}
+                checked={selectBilling[`${billing.invoice_invoice_no}`]}
+                onCheckedChange={(e) => setSelectBilling({
+                  ...selectBilling,
+                  [`${billing.invoice_invoice_no}`]: !!e.checked
+                })}
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label>{billing.invoice_invoice_no}</Checkbox.Label>
+              </Checkbox.Root>
+            </Box>
+          ) : null
+        }
+        {/* {['2508951', '2508952', '2508953', '2508954', '2508955', '2508956'].map(item =>
+          <Box width={'20%'} marginTop="10px">
+            <Checkbox.Root size={'md'}
+              checked={selectBilling[`${item}`]}
+              onCheckedChange={(e) => setSelectBilling({
+                ...selectBilling,
+                [`${item}`]: !!e.checked
+              })}
+            >
+              <Checkbox.HiddenInput />
+              <Checkbox.Control />
+              <Checkbox.Label>{item}</Checkbox.Label>
+            </Checkbox.Root>
+          </Box>)
+        } */}
+      </Box>
+      <Box marginTop={'20px'}>
+        <Button
+          disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
+          onClick={async () => {
+            const response = await exportBilling(keys(pickBy(selectBilling, (billing) => billing)), 'DIT')
+            const url = window.URL.createObjectURL(new Blob([response as any]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'billing.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          }}
+        >Export DIT</Button>
+      </Box>
+      <Button marginTop={'20px'}
+        disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
+        onClick={async () => {
+          const response = await exportBilling(keys(pickBy(selectBilling, (billing) => billing)), 'DITT')
+          const url = window.URL.createObjectURL(new Blob([response as any]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'billing-ditt.xlsx');
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }}
+      >Export DITT</Button>
     </Box>
   </Box>
 }

@@ -25,6 +25,7 @@ axiosInstance.interceptors.response.use(
 
     if (status === 401 && !skipAuthPaths.includes(path)) {
       localStorage.removeItem('accessToken'); // Clear token
+      localStorage.removeItem('expiresAt')
       window.location.href = 'login'
     }
     // Handle response errors (e.g., logging, notifications)
