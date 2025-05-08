@@ -5,9 +5,17 @@ import { useFormik } from "formik"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import { login } from "../service/jket";
+import { useEffect } from "react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      navigate("/upload")
+    }
+  }, [])
 
   const formik = useFormik({
     initialValues: {

@@ -9,6 +9,7 @@ import pickBy from "lodash/pickBy";
 type BillingSearch = {
   startDate?: Date
   endDate?: Date
+  status?: string
 }
 
 interface BillingState {
@@ -23,6 +24,7 @@ interface BillingState {
   onPageChange: (page: number) => Promise<void>
   onPageSizeChange: (pageSize: number) => Promise<void>
   setSearch: (input: BillingSearch) => void
+  clearBilling: () => void
 }
 
 
@@ -35,7 +37,7 @@ const useBillingStore = create<BillingState>()(
     isLoading: false,
     error: null,
     monthly: new Date(),
-    search: {},
+    search: { status: 'ALL' },
 
     fetchBilling: async (options?: { limit?: number, offset?: number, reset?: boolean, changePage?: boolean }) => {
       set({ isLoading: true, error: null });
@@ -47,6 +49,7 @@ const useBillingStore = create<BillingState>()(
         const response = await listBilling({
           limit,
           offset: options?.reset ? 0 : offset,
+          status: search.status,
           ...search.startDate && search.endDate ? {
             startDate: DateTime.fromJSDate(search.startDate).toFormat('yyyyMMdd'),
             endDate: DateTime.fromJSDate(search.endDate).toFormat('yyyyMMdd')
@@ -91,6 +94,9 @@ const useBillingStore = create<BillingState>()(
       });
       set({ billings: response.billings, count: response.count, offset: 0, limit: pageSize });
     },
+    clearBilling: () => {
+      set({ billings: null })
+    }
   }))
 )
 

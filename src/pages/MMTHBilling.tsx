@@ -3,19 +3,18 @@ import { Box, Button, Checkbox, Field, Input, NativeSelect, Table, Text } from "
 import DatePicker from "react-datepicker"
 import { useEffect, useState } from "react";
 import useBillingStore from "../store/billingStore";
-import { exportBilling } from "../service/jket";
+import { exportBilling, exportBillingTXT } from "../service/jket";
 import { isEmpty, keys, pickBy } from "lodash";
+import '../DatePicker.css'
 
 const MMTHOrder = () => {
-  const { billings, fetchBilling, search, offset, count, limit, onPageChange, onPageSizeChange, setSearch } = useBillingStore()
-  const [status, setStatus] = useState('all')
+  const { billings, fetchBilling, search, offset, count, limit, onPageChange, onPageSizeChange, setSearch, clearBilling } = useBillingStore()
   const [selectBilling, setSelectBilling] = useState<{ [key: string]: boolean }>({})
-  useEffect(() => {
-    if (!billings) {
-      fetchBilling()
-    }
-  }, [])
-  console.log('billings', billings)
+  // useEffect(() => {
+  //   if (!billings) {
+  //     fetchBilling()
+  //   }
+  // }, [])
 
   return <Box>
     <AppBar />
@@ -33,6 +32,9 @@ const MMTHOrder = () => {
               onChange={(dates) => {
                 const [start, end] = dates
                 setSearch({ startDate: start, endDate: end })
+                if (!start && !end) {
+                  clearBilling()
+                }
               }}
               selectsRange={true}
               startDate={search?.startDate}
@@ -52,16 +54,28 @@ const MMTHOrder = () => {
             <NativeSelect.Root width="240px">
               <NativeSelect.Field
                 placeholder="Select option"
-                value={status}
-                onChange={(e) => setStatus(e.currentTarget.value)}
+                value={search.status}
+                onChange={(e) => setSearch({ status: e.currentTarget.value })}
               >
-                <option value="all">All</option>
+                <option value="ALL">All</option>
+                <option value="NEW">New</option>
+                <option value="EXPORTED">Exported</option>
+                <option value="EXPORTED_DIT">Exported {`(DIT)`}</option>
+                <option value="EXPORTED_DITT">Exported {`(DITT)`}</option>
               </NativeSelect.Field>
               <NativeSelect.Indicator />
             </NativeSelect.Root>
           </Field.Root>
         </Box>
       </Box>
+      <Button
+        onClick={() => {
+          fetchBilling()
+          setSelectBilling({})
+        }}
+        marginTop="20px"
+        disabled={!search.endDate || !search.startDate}
+      >Search</Button>
       <Box marginTop="20px" display='fex' flexWrap='wrap'>
         {
           billings?.length ? billings.map(billing =>
@@ -80,50 +94,77 @@ const MMTHOrder = () => {
             </Box>
           ) : null
         }
-        {/* {['2508951', '2508952', '2508953', '2508954', '2508955', '2508956'].map(item =>
-          <Box width={'20%'} marginTop="10px">
-            <Checkbox.Root size={'md'}
-              checked={selectBilling[`${item}`]}
-              onCheckedChange={(e) => setSelectBilling({
-                ...selectBilling,
-                [`${item}`]: !!e.checked
-              })}
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label>{item}</Checkbox.Label>
-            </Checkbox.Root>
-          </Box>)
-        } */}
+      </Box>
+      <Box marginTop={'20px'}>
+        <Box display='flex'>
+          <Button
+            bg='#385723'
+            disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
+            onClick={async () => {
+              const response = await exportBilling(keys(pickBy(selectBilling, (billing) => billing)), 'DIT')
+              const url = window.URL.createObjectURL(new Blob([response as any]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', 'DIT043.xlsx');
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              setSelectBilling({})
+            }}
+          >Export DIT .xlsx</Button>
+          <Button
+            marginLeft="25px"
+            disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
+            onClick={async () => {
+              const response = await exportBillingTXT(keys(pickBy(selectBilling, (billing) => billing)), 'DIT')
+              const url = window.URL.createObjectURL(new Blob([response as any]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', 'DIT043.txt');
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              setSelectBilling({})
+            }}
+          >
+            Export DIT .txt
+          </Button>
+        </Box>
       </Box>
       <Box marginTop={'20px'}>
         <Button
+          bg='#385723'
           disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
           onClick={async () => {
-            const response = await exportBilling(keys(pickBy(selectBilling, (billing) => billing)), 'DIT')
+            const response = await exportBilling(keys(pickBy(selectBilling, (billing) => billing)), 'DITT')
             const url = window.URL.createObjectURL(new Blob([response as any]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'billing.xlsx');
+            link.setAttribute('download', 'DITT043.xlsx');
             document.body.appendChild(link);
             link.click();
             link.remove();
+            setSelectBilling({})
           }}
-        >Export DIT</Button>
+        >Export DITT .xlsx</Button>
+        <Button
+          marginLeft="25px"
+          disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
+          onClick={async () => {
+            const response = await exportBillingTXT(keys(pickBy(selectBilling, (billing) => billing)), 'DITT')
+            const url = window.URL.createObjectURL(new Blob([response as any]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'DITT043.txt');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setSelectBilling({})
+          }}
+        >
+          Export DITT .txt
+        </Button>
       </Box>
-      <Button marginTop={'20px'}
-        disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
-        onClick={async () => {
-          const response = await exportBilling(keys(pickBy(selectBilling, (billing) => billing)), 'DITT')
-          const url = window.URL.createObjectURL(new Blob([response as any]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', 'billing-ditt.xlsx');
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        }}
-      >Export DITT</Button>
     </Box>
   </Box>
 }

@@ -131,4 +131,5 @@ export interface ListBillingOptions {
   endDate?: string
   offset?: number
   limit?: number
+  status?: string
 }

@@ -97,3 +97,10 @@ export const exportBilling = async (billings: string[], type: string) => {
     { responseType: 'blob', });
   return response
 }
+
+export const exportBillingTXT = async (billings: string[], type: string) => {
+  const response = await axiosInstance.post(`/billing/text/export`,
+    { billings, type },
+    { responseType: 'blob', });
+  return response
+}

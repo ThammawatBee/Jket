@@ -33,9 +33,6 @@ const MMTHOrder = () => {
                 dateStart: start,
                 dateEnd: end
               })
-              if (start && end) {
-                fetchDeliveryReports({ reset: true })
-              }
             }}
             selectsRange={true}
             startDate={search.dateStart}
@@ -62,6 +59,9 @@ const MMTHOrder = () => {
           >Export as Excel</Button>
         </Box>
       </Box>
+      <Button marginTop='20px' onClick={() => {
+        fetchDeliveryReports({ reset: true })
+      }}>Search</Button>
       <Box marginTop={'25px'}>
         <Table.Root size="md" showColumnBorder>
           <Table.Header>
