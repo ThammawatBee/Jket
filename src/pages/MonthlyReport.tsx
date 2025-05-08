@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import useReportStore from "../store/reportStore";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import PageSizeSelect from "../components/PageSizeSelect";
+import '../DatePicker.css'
 
 const MonthlyReport = () => {
   const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count } = useReportStore()
@@ -32,6 +33,23 @@ const MonthlyReport = () => {
     });
     await fetchReports({ reset: true })
   }
+  const selectHeight = () => {
+    if (limit === 10) {
+      return '400px'
+    }
+    if (limit === 25) {
+      return '600px'
+    }
+    if (limit === 50) {
+      return '600px'
+    }
+    if (limit === 100) {
+      return '600px'
+    }
+  }
+  console.log('reports', reports?.[0])
+  const report = reports?.[0]
+
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -69,8 +87,8 @@ const MonthlyReport = () => {
         </Box>
       </Box>
       <Box marginTop={'25px'}>
-        <Table.ScrollArea>
-          <Table.Root size="md" showColumnBorder>
+        <Table.ScrollArea borderWidth="1px" rounded="md" height={selectHeight()}>
+          <Table.Root size="md" showColumnBorder stickyHeader>
             <Table.Header>
               <Table.Row background={"#F6F6F6"}>
                 <Table.ColumnHeader>Plant Code</Table.ColumnHeader>
@@ -115,46 +133,46 @@ const MonthlyReport = () => {
             </Table.Header>
             <Table.Body>
               {reports?.length ? reports.slice(offset * limit, (offset + 1) * limit).map(report =>
-                <Table.Row key={report.id}>
-                  <Table.Cell>{report.plantCode}</Table.Cell>
-                  <Table.Cell>{report.venderCode}</Table.Cell>
-                  <Table.Cell>{report.delNumber}</Table.Cell>
-                  <Table.Cell>{DateTime.fromISO(report.delDate).toFormat('dd/MM/yyyy')} </Table.Cell>
-                  <Table.Cell>{report.delPeriod}</Table.Cell>
-                  <Table.Cell>{report.delSlideDate}</Table.Cell>
-                  <Table.Cell>{report.delSlidePeriod}</Table.Cell>
-                  <Table.Cell>{DateTime.fromISO(report.receivedDate).toFormat('dd/MM/yyyy')}</Table.Cell>
-                  <Table.Cell>{report.delCtl}</Table.Cell>
-                  <Table.Cell>{report.workGroup}</Table.Cell>
-                  <Table.Cell>{report.poNo}</Table.Cell>
-                  <Table.Cell>{report.materialNo}</Table.Cell>
-                  <Table.Cell>{report.materialName}</Table.Cell>
-                  <Table.Cell>{report.poQty}</Table.Cell>
-                  <Table.Cell>{report.receiveQty}</Table.Cell>
-                  <Table.Cell>{report.receiveArea}</Table.Cell>
-                  <Table.Cell>{report.followingProc}</Table.Cell>
-                  <Table.Cell>{report.privilegeFlag}</Table.Cell>
-                  <Table.Cell>{report.barcodeStatus}</Table.Cell>
-                  <Table.Cell>{report.tagId}</Table.Cell>
-                  <Table.Cell>{report.organizeId}</Table.Cell>
-                  <Table.Cell>{report.vatSaleFlag}</Table.Cell>
-                  <Table.Cell>{report.invoiceDateShipped}</Table.Cell>
-                  <Table.Cell>{report.invoiceInvoiceNo}</Table.Cell>
-                  <Table.Cell>{report.invoiceCustomerOrderNumber}</Table.Cell>
-                  <Table.Cell>{report.invoicePrice}</Table.Cell>
-                  <Table.Cell>{report.invoiceSalesAmount}</Table.Cell>
-                  <Table.Cell>{report.deliveryVenderCode}</Table.Cell>
-                  <Table.Cell>{report.deliveryPlantCode}</Table.Cell>
-                  <Table.Cell>{report.deliveryDeliveryNo}</Table.Cell>
-                  <Table.Cell>{report.deliveryDeliveryDate && DateTime.fromISO(report.deliveryDeliveryDate).toFormat('dd/MM/yyyy')}</Table.Cell>
-                  <Table.Cell>{report.deliveryPartNo}</Table.Cell>
-                  <Table.Cell>{report.deliveryQty && +report.deliveryQty}</Table.Cell>
-                  <Table.Cell>{report.deliveryReceiveArea}</Table.Cell>
-                  <Table.Cell>{report.deliveryFollowingProc}</Table.Cell>
-                  <Table.Cell>{report.deliveryVat}</Table.Cell>
-                  <Table.Cell>{report.deliveryPrivilegeFlag}</Table.Cell>
-                  <Table.Cell>{report.deliveryReferenceNoTag}</Table.Cell>
-                </Table.Row>) : null}
+              <Table.Row key={report.id}>
+                <Table.Cell>{report.plantCode}</Table.Cell>
+                <Table.Cell>{report.venderCode}</Table.Cell>
+                <Table.Cell>{report.delNumber}</Table.Cell>
+                <Table.Cell>{DateTime.fromISO(report.delDate).toFormat('dd/MM/yyyy')} </Table.Cell>
+                <Table.Cell>{report.delPeriod}</Table.Cell>
+                <Table.Cell>{report.delSlideDate}</Table.Cell>
+                <Table.Cell>{report.delSlidePeriod}</Table.Cell>
+                <Table.Cell>{DateTime.fromISO(report.receivedDate).toFormat('dd/MM/yyyy')}</Table.Cell>
+                <Table.Cell>{report.delCtl}</Table.Cell>
+                <Table.Cell>{report.workGroup}</Table.Cell>
+                <Table.Cell>{report.poNo}</Table.Cell>
+                <Table.Cell>{report.materialNo}</Table.Cell>
+                <Table.Cell>{report.materialName}</Table.Cell>
+                <Table.Cell>{report.poQty}</Table.Cell>
+                <Table.Cell>{report.receiveQty}</Table.Cell>
+                <Table.Cell>{report.receiveArea}</Table.Cell>
+                <Table.Cell>{report.followingProc}</Table.Cell>
+                <Table.Cell>{report.privilegeFlag}</Table.Cell>
+                <Table.Cell>{report.barcodeStatus}</Table.Cell>
+                <Table.Cell>{report.tagId}</Table.Cell>
+                <Table.Cell>{report.organizeId}</Table.Cell>
+                <Table.Cell>{report.vatSaleFlag}</Table.Cell>
+                <Table.Cell>{report.invoiceDateShipped}</Table.Cell>
+                <Table.Cell>{report.invoiceInvoiceNo}</Table.Cell>
+                <Table.Cell>{report.invoiceCustomerOrderNumber}</Table.Cell>
+                <Table.Cell>{report.invoicePrice}</Table.Cell>
+                <Table.Cell>{report.invoiceSalesAmount}</Table.Cell>
+                <Table.Cell>{report.deliveryVenderCode}</Table.Cell>
+                <Table.Cell>{report.deliveryPlantCode}</Table.Cell>
+                <Table.Cell>{report.deliveryDeliveryNo}</Table.Cell>
+                <Table.Cell>{report.deliveryDeliveryDate && DateTime.fromISO(report.deliveryDeliveryDate).toFormat('dd/MM/yyyy')}</Table.Cell>
+                <Table.Cell>{report.deliveryPartNo}</Table.Cell>
+                <Table.Cell>{report.deliveryQty && +report.deliveryQty}</Table.Cell>
+                <Table.Cell>{report.deliveryReceiveArea}</Table.Cell>
+                <Table.Cell>{report.deliveryFollowingProc}</Table.Cell>
+                <Table.Cell>{report.deliveryVat}</Table.Cell>
+                <Table.Cell>{report.deliveryPrivilegeFlag}</Table.Cell>
+                <Table.Cell>{report.deliveryReferenceNoTag}</Table.Cell>
+              </Table.Row>) : null}
             </Table.Body>
           </Table.Root>
         </Table.ScrollArea>
@@ -201,6 +219,6 @@ const MonthlyReport = () => {
         </Box> : <Box height={'75px'} />}
       </Box>
     </Box>
-  </Box>
+  </Box >
 }
 export default MonthlyReport

@@ -23,7 +23,7 @@ const useReportStore = create<ReportState>()(
     reports: null,
     count: 0,
     offset: 0,
-    limit: 10,
+    limit: 100,
     isLoading: false,
     error: null,
     monthly: new Date(),
