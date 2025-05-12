@@ -1,21 +1,31 @@
 import UserDialog from "../components/UserDialog"
 import AppBar from "../components/AppBar"
-import { Box, Button, ButtonGroup, IconButton, Pagination, Table, Text } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Field, IconButton, Input, Pagination, Table, Text } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import useUserStore from "../store/userStore"
 import PageSizeSelect from "../components/PageSizeSelect"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import { resetInitialPassword } from "../service/jket"
 import SuccessToast from "../components/SuccessToast"
+import useAuthStore from "../store/authStore"
+import { useNavigate } from "react-router-dom"
 
 const UserManagement = () => {
+  const navigate = useNavigate();
   const [openModal, setOpenModal] = useState(false)
   const { users, limit, onPageSizeChange, onPageChange, offset, count, search, setSearch, fetchUsers } = useUserStore()
+  const { profile } = useAuthStore()
   useEffect(() => {
     if (!users) {
       fetchUsers()
     }
   }, [])
+
+  useEffect(() => {
+    if (profile && profile.role !== 'admin') {
+      navigate("/upload")
+    }
+  }, [profile])
   const onResetPassword = async (userId: string, username: string) => {
     await resetInitialPassword(userId)
     SuccessToast(`Reset password ${username} success`)
@@ -25,6 +35,35 @@ const UserManagement = () => {
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
       <Text marginBottom={"20px"} textStyle={'xl'} color={'#1A69AA'} fontWeight='bold'>User Management</Text>
+      <Box mt="10px" display="flex" mb="15px" justifyContent='space-between'>
+        <Field.Root width="30%">
+          <Field.Label>Username</Field.Label>
+          <Input
+            value={search.username}
+            onChange={(e) => {
+              setSearch({ username: e.currentTarget.value })
+            }} />
+        </Field.Root>
+        <Field.Root width="30%">
+          <Field.Label>Name</Field.Label>
+          <Input
+            value={search.name}
+            onChange={(e) => {
+              setSearch({ name: e.currentTarget.value })
+            }} />
+        </Field.Root>
+        <Field.Root width="30%">
+          <Field.Label>Division</Field.Label>
+          <Input
+            value={search.division}
+            onChange={(e) => {
+              setSearch({ division: e.currentTarget.value })
+            }} />
+        </Field.Root>
+      </Box>
+      <Button  marginBottom='20px' onClick={() => {
+        fetchUsers({ reset: true })
+      }}>Search</Button>
       <Table.Root size="md">
         <Table.Header>
           <Table.Row background={"#F9FAFB"}>

@@ -7,6 +7,7 @@ import { devtools } from 'zustand/middleware'
 type UserSearch = {
   username?: string
   name?: string
+  division?: string
 }
 
 interface UserState {

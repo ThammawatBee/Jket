@@ -19,10 +19,10 @@ function App() {
         <Route path="/upload" element={<PrivateRoute>
           <UploadPage />
         </PrivateRoute>} />
-        <Route path="/monthly-report" element={<MonthlyReport />} />
-        <Route path="/mmth-order" element={<MMTHOrder />} />
-        <Route path="/export-mmth-billing" element={<MMTHBilling />} />
-        <Route path="/user-management" element={<UserManagement />} />
+        <Route path="/monthly-report" element={<PrivateRoute><MonthlyReport /></PrivateRoute>} />
+        <Route path="/mmth-order" element={<PrivateRoute><MMTHOrder /></PrivateRoute>} />
+        <Route path="/export-mmth-billing" element={<PrivateRoute><MMTHBilling /></PrivateRoute>} />
+        <Route path="/user-management" element={<PrivateRoute><UserManagement /></PrivateRoute>} />
         <Route path="/*" element={<LoginPage />} />
       </Routes>
     </Box>

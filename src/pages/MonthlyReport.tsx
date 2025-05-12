@@ -47,8 +47,6 @@ const MonthlyReport = () => {
       return '600px'
     }
   }
-  console.log('reports', reports?.[0])
-  const report = reports?.[0]
 
   return <Box>
     <AppBar />
