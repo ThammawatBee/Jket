@@ -6,14 +6,25 @@ import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import { login } from "../service/jket";
 import { useEffect } from "react";
+import useAuthStore from "../store/authStore";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { getProfile } = useAuthStore()
+
+  const checkAuth = async () => {
+    try {
+      await getProfile()
+      navigate("/upload")
+    } catch (err) {
+      navigate('/login', { replace: true })
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      navigate("/upload")
+      checkAuth()
     }
   }, [])
 
