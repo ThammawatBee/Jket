@@ -161,7 +161,7 @@ const UploadPage = () => {
     if (section === "receiveFile") {
       return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
         <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
-        <FileUpload.Root maxFiles={10} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
+        <FileUpload.Root maxFiles={20} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
           if (file.acceptedFiles?.length) {
             setReceiveFiles(unionBy(file.acceptedFiles, "name"))
           }
@@ -219,7 +219,7 @@ const UploadPage = () => {
     else if (section === 'invoice') {
       return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
         <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
-        <FileUpload.Root maxFiles={10} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
+        <FileUpload.Root maxFiles={20} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
           if (file.acceptedFiles?.length) {
             setInvoiceFiles(unionBy(file.acceptedFiles, "name"))
           }
@@ -276,7 +276,7 @@ const UploadPage = () => {
     else if (section === 'orderFile') {
       return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
         <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
-        <FileUpload.Root maxFiles={10} accept={'.txt'} onFileChange={async (file) => {
+        <FileUpload.Root maxFiles={20} accept={'.txt'} onFileChange={async (file) => {
           if (file.acceptedFiles?.length) {
             setDeliveryReportFiles(unionBy(file.acceptedFiles, "name"))
           }

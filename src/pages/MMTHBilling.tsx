@@ -1,7 +1,7 @@
 import AppBar from "../components/AppBar"
 import { Box, Button, Checkbox, Field, Input, NativeSelect, Table, Text } from "@chakra-ui/react"
 import DatePicker from "react-datepicker"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useBillingStore from "../store/billingStore";
 import { exportBilling, exportBillingTXT } from "../service/jket";
 import { isEmpty, keys, pickBy } from "lodash";
@@ -109,7 +109,6 @@ const MMTHOrder = () => {
               document.body.appendChild(link);
               link.click();
               link.remove();
-              setSelectBilling({})
             }}
           >Export DIT .xlsx</Button>
           <Button
@@ -124,7 +123,6 @@ const MMTHOrder = () => {
               document.body.appendChild(link);
               link.click();
               link.remove();
-              setSelectBilling({})
             }}
           >
             Export DIT .txt
@@ -144,7 +142,6 @@ const MMTHOrder = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
-            setSelectBilling({})
           }}
         >Export DITT .xlsx</Button>
         <Button
@@ -159,7 +156,6 @@ const MMTHOrder = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
-            setSelectBilling({})
           }}
         >
           Export DITT .txt
