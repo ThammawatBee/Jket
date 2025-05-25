@@ -78,10 +78,10 @@ const MMTHOrder = () => {
       >Search</Button>
       <Box marginTop="20px" display='fex' flexWrap='wrap'>
         {
-          billings?.length ? billings.map(billing =>
-            <Box width={'20%'} marginTop="10px">
+          billings?.length ? billings.map(billing => {
+            return <Box width={'20%'} marginTop="10px">
               <Checkbox.Root size={'md'}
-                checked={selectBilling[`${billing.invoice_invoice_no}`]}
+                checked={selectBilling[`${billing.invoice_invoice_no}`] || false}
                 onCheckedChange={(e) => setSelectBilling({
                   ...selectBilling,
                   [`${billing.invoice_invoice_no}`]: !!e.checked
@@ -92,7 +92,7 @@ const MMTHOrder = () => {
                 <Checkbox.Label>{billing.invoice_invoice_no}</Checkbox.Label>
               </Checkbox.Root>
             </Box>
-          ) : null
+          }) : null
         }
       </Box>
       <Box marginTop={'20px'}>
