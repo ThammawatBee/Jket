@@ -16,6 +16,21 @@ const MMTHOrder = () => {
     }
   }, [])
 
+  const selectHeight = () => {
+    if (limit === 10) {
+      return '400px'
+    }
+    if (limit === 25) {
+      return '600px'
+    }
+    if (limit === 50) {
+      return '600px'
+    }
+    if (limit === 100) {
+      return '600px'
+    }
+  }
+
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -34,6 +49,7 @@ const MMTHOrder = () => {
                 dateEnd: end
               })
             }}
+
             selectsRange={true}
             startDate={search.dateStart}
             endDate={search.dateEnd}
@@ -63,39 +79,41 @@ const MMTHOrder = () => {
         fetchDeliveryReports({ reset: true })
       }}>Search</Button>
       <Box marginTop={'25px'}>
-        <Table.Root size="md" showColumnBorder>
-          <Table.Header>
-            <Table.Row background={"#F6F6F6"}>
-              <Table.ColumnHeader>Vendor_code</Table.ColumnHeader>
-              <Table.ColumnHeader>Plant_code</Table.ColumnHeader>
-              <Table.ColumnHeader>Delivery_No</Table.ColumnHeader>
-              <Table.ColumnHeader>Delivery_Date</Table.ColumnHeader>
-              <Table.ColumnHeader>Part_No</Table.ColumnHeader>
-              <Table.ColumnHeader>Q'ty</Table.ColumnHeader>
-              <Table.ColumnHeader>Receive_area</Table.ColumnHeader>
-              <Table.ColumnHeader>Following_proc</Table.ColumnHeader>
-              <Table.ColumnHeader>Vat</Table.ColumnHeader>
-              <Table.ColumnHeader>Privilege_Flag</Table.ColumnHeader>
-              <Table.ColumnHeader>Reference_No_Tag</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>{
-            deliveryReports?.length ?
-              deliveryReports.slice(offset * limit, (offset + 1) * limit).map(deliveryReport => <Table.Row key={deliveryReport.id}>
-                <Table.Cell>{deliveryReport.venderCode}</Table.Cell>
-                <Table.Cell>{deliveryReport.plantCode}</Table.Cell>
-                <Table.Cell>{deliveryReport.deliveryNo}</Table.Cell>
-                <Table.Cell>{DateTime.fromISO(deliveryReport.deliveryDate).toFormat('dd/MM/yyyy')}</Table.Cell>
-                <Table.Cell>{deliveryReport.partNo}</Table.Cell>
-                <Table.Cell>{+deliveryReport.qty}</Table.Cell>
-                <Table.Cell>{deliveryReport.receiveArea}</Table.Cell>
-                <Table.Cell>{deliveryReport.followingProc}</Table.Cell>
-                <Table.Cell>{deliveryReport.vat}</Table.Cell>
-                <Table.Cell>{deliveryReport.privilegeFlag}</Table.Cell>
-                <Table.Cell>{deliveryReport.referenceNoTag}</Table.Cell>
-              </Table.Row>)
-              : null}</Table.Body>
-        </Table.Root>
+        <Table.ScrollArea borderWidth="1px" rounded="md" height={selectHeight()}>
+          <Table.Root size="md" showColumnBorder stickyHeader>
+            <Table.Header>
+              <Table.Row background={"#F6F6F6"}>
+                <Table.ColumnHeader>Vendor_code</Table.ColumnHeader>
+                <Table.ColumnHeader>Plant_code</Table.ColumnHeader>
+                <Table.ColumnHeader>Delivery_No</Table.ColumnHeader>
+                <Table.ColumnHeader>Delivery_Date</Table.ColumnHeader>
+                <Table.ColumnHeader>Part_No</Table.ColumnHeader>
+                <Table.ColumnHeader>Q'ty</Table.ColumnHeader>
+                <Table.ColumnHeader>Receive_area</Table.ColumnHeader>
+                <Table.ColumnHeader>Following_proc</Table.ColumnHeader>
+                <Table.ColumnHeader>Vat</Table.ColumnHeader>
+                <Table.ColumnHeader>Privilege_Flag</Table.ColumnHeader>
+                <Table.ColumnHeader>Reference_No_Tag</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>{
+              deliveryReports?.length ?
+                deliveryReports.slice(offset * limit, (offset + 1) * limit).map(deliveryReport => <Table.Row key={deliveryReport.id}>
+                  <Table.Cell>{deliveryReport.venderCode}</Table.Cell>
+                  <Table.Cell>{deliveryReport.plantCode}</Table.Cell>
+                  <Table.Cell>{deliveryReport.deliveryNo}</Table.Cell>
+                  <Table.Cell>{DateTime.fromISO(deliveryReport.deliveryDate).toFormat('dd/MM/yyyy')}</Table.Cell>
+                  <Table.Cell>{deliveryReport.partNo}</Table.Cell>
+                  <Table.Cell>{+deliveryReport.qty}</Table.Cell>
+                  <Table.Cell>{deliveryReport.receiveArea}</Table.Cell>
+                  <Table.Cell>{deliveryReport.followingProc}</Table.Cell>
+                  <Table.Cell>{deliveryReport.vat}</Table.Cell>
+                  <Table.Cell>{deliveryReport.privilegeFlag}</Table.Cell>
+                  <Table.Cell>{deliveryReport.referenceNoTag}</Table.Cell>
+                </Table.Row>)
+                : null}</Table.Body>
+          </Table.Root>
+        </Table.ScrollArea>
         {deliveryReports?.length ? <Box mt={'15px'} mb={'15px'} display='flex' justifyContent={'space-between'}>
           <Box display={'flex'} fontSize={'14px'} alignItems={'center'}>
             Row per page
