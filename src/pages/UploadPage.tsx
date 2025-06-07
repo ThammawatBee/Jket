@@ -12,6 +12,10 @@ import { createDeliveryReports, createReports, uploadInvoice } from "../service/
 import { toast } from "react-toastify"
 import { LuUpload } from "react-icons/lu"
 import { checkErrorReportUploadHeader, selectFileHeaders } from "../helper/checkFileHeader"
+import reverse from "lodash/reverse"
+import uniqBy from "lodash/unionBy"
+import useReportStore from "../store/reportStore"
+import useDeliveryStore from "../store/deliveryStore"
 
 const UploadPage = () => {
   const [section, setSection] = useState("init")
@@ -19,6 +23,8 @@ const UploadPage = () => {
   const [invoiceFiles, setInvoiceFiles] = useState<File[]>([])
   const [deliveryReportFiles, setDeliveryReportFiles] = useState<File[]>([])
   const fileUpload = useFileUpload({})
+  const { fetchReports } = useReportStore()
+  const { fetchDeliveryReports } = useDeliveryStore()
 
 
   const handleUploadXlsFile = (file: File, type: string) => {
@@ -51,7 +57,7 @@ const UploadPage = () => {
               await createReports(results.data.map(data => ReceiveMapper(data)))
             }
             if (type === 'invoice') {
-              await uploadInvoice(results.data.map(data => InvoiceMapper(data)))
+              await uploadInvoice(reverse(uniqBy(reverse(results.data.map(data => InvoiceMapper(data))), 'customerOrderNumber')))
             }
             parser.resume(); // Resume parsing after successful upload
           } catch (error: any) {
@@ -90,8 +96,10 @@ const UploadPage = () => {
             isCheckHeader = false
             if (type === 'report') {
               setReceiveFiles(receiveFiles.filter(receiveFile => receiveFile.name !== file.name))
+              fetchReports({ reset: true })
             } else {
               setInvoiceFiles(invoiceFiles.filter(invoiceFile => file.name !== invoiceFile.name))
+              fetchReports({ reset: true })
             }
           }
         },
@@ -139,6 +147,7 @@ const UploadPage = () => {
           theme: "light",
         })
         setDeliveryReportFiles(deliveryReportFiles.filter(deliveryReportFile => deliveryReportFile.name !== file.name))
+        fetchDeliveryReports({ reset: true })
       } catch (error: any) {
         let errorMessage = ''
         if (error?.data?.detail) {
