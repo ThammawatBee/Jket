@@ -110,6 +110,7 @@ export interface ListReportOptions {
   offset?: number
   limit?: number
   monthly?: string
+  status?: 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED'
 }
 
 export interface ListDeliveryReportOptions {
@@ -132,4 +133,5 @@ export interface ListBillingOptions {
   offset?: number
   limit?: number
   status?: string
+  plantCode?: string
 }

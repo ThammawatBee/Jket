@@ -10,6 +10,7 @@ type BillingSearch = {
   startDate?: Date
   endDate?: Date
   status?: string
+  plantCode?: string
 }
 
 interface BillingState {
@@ -37,7 +38,7 @@ const useBillingStore = create<BillingState>()(
     isLoading: false,
     error: null,
     monthly: new Date(),
-    search: { status: 'ALL' },
+    search: { status: 'ALL', plantCode: 'D' },
 
     fetchBilling: async (options?: { limit?: number, offset?: number, reset?: boolean, changePage?: boolean }) => {
       set({ isLoading: true, error: null });
@@ -50,6 +51,7 @@ const useBillingStore = create<BillingState>()(
           limit,
           offset: options?.reset ? 0 : offset,
           status: search.status,
+          plantCode: search.plantCode,
           ...search.startDate && search.endDate ? {
             startDate: DateTime.fromJSDate(search.startDate).toFormat('yyyyMMdd'),
             endDate: DateTime.fromJSDate(search.endDate).toFormat('yyyyMMdd')
