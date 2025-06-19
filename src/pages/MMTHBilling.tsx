@@ -23,6 +23,25 @@ const MMTHOrder = () => {
       <Box display='flex'>
         <Box>
           <Field.Root>
+            <Field.Label>Select Plant Code</Field.Label>
+            <NativeSelect.Root width="240px">
+              <NativeSelect.Field
+                placeholder="Select Plant Code"
+                value={search.plantCode}
+                onChange={(e) => setSearch({ plantCode: e.currentTarget.value })}
+              >
+                <option value="B">B</option>
+                <option value="D">D</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+                <option value="H">H</option>
+              </NativeSelect.Field>
+              <NativeSelect.Indicator />
+            </NativeSelect.Root>
+          </Field.Root>
+        </Box>
+        <Box marginLeft={"25px"}>
+          <Field.Root>
             <Field.Label>Select Date</Field.Label>
             <DatePicker
               dateFormat="dd-MM-yyyy"
@@ -105,7 +124,7 @@ const MMTHOrder = () => {
               const url = window.URL.createObjectURL(new Blob([response as any]));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', 'DIT043.xlsx');
+              link.setAttribute('download', `${search.plantCode}IT.xlsx`);
               document.body.appendChild(link);
               link.click();
               link.remove();
@@ -119,7 +138,7 @@ const MMTHOrder = () => {
               const url = window.URL.createObjectURL(new Blob([response as any]));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', 'DIT043.txt');
+              link.setAttribute('download', `${search.plantCode}IT.txt`);
               document.body.appendChild(link);
               link.click();
               link.remove();
@@ -138,7 +157,7 @@ const MMTHOrder = () => {
             const url = window.URL.createObjectURL(new Blob([response as any]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'DITT043.xlsx');
+            link.setAttribute('download', `${search.plantCode}ITT.xlsx`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -152,7 +171,7 @@ const MMTHOrder = () => {
             const url = window.URL.createObjectURL(new Blob([response as any]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'DITT043.txt');
+            link.setAttribute('download', `${search.plantCode}ITT.txt`);
             document.body.appendChild(link);
             link.click();
             link.remove();

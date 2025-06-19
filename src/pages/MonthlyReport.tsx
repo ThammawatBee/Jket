@@ -1,7 +1,7 @@
 import AppBar from "../components/AppBar"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
-import { Box, Button, ButtonGroup, IconButton, Input, Pagination, Table, Text } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Field, IconButton, Input, Pagination, Table, Text, NativeSelect, } from "@chakra-ui/react"
 import { useEffect } from "react";
 import { DateTime } from "luxon";
 import { exportReports, mergeWithDeliveryFile } from "../service/jket";
@@ -12,7 +12,7 @@ import PageSizeSelect from "../components/PageSizeSelect";
 import '../DatePicker.css'
 
 const MonthlyReport = () => {
-  const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count } = useReportStore()
+  const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count, status, setStatus } = useReportStore()
   useEffect(() => {
     if (!reports) {
       fetchReports()
@@ -54,26 +54,51 @@ const MonthlyReport = () => {
       <Box display='flex' justifyContent='space-between'>
         <Box>
           <Text marginBottom={"20px"} textStyle={'xl'} color={'#1A69AA'} fontWeight='bold'>Monthly Report</Text>
-          <DatePicker
-            selected={monthly}
-            showMonthYearPicker
-            onChange={(date) => {
-              if (date) {
-                setMonthly(date)
-                fetchReports({ reset: true })
-              }
-            }}
-            dateFormat="MM/yyyy"
-            customInput={<Input
-              readOnly={true}
-              value={monthly ? DateTime.fromJSDate(monthly).toFormat('MM/yyyy') : ''}
-              background={'white'} />}
-          />
+          <Box display={'flex'}>
+            <Box>
+              <Text marginBottom={"10px"}>Select Monthly</Text>
+              <DatePicker
+                selected={monthly}
+                showMonthYearPicker
+                onChange={(date) => {
+                  if (date) {
+                    setMonthly(date)
+                    fetchReports({ reset: true })
+                  }
+                }}
+                dateFormat="MM/yyyy"
+                customInput={<Input
+                  readOnly={true}
+                  value={monthly ? DateTime.fromJSDate(monthly).toFormat('MM/yyyy') : ''}
+                  background={'white'} />}
+              />
+            </Box>
+            <Box marginLeft={'20px'}>
+              <Text marginBottom={"10px"}>Select Monthly</Text>
+              <NativeSelect.Root>
+                <NativeSelect.Field
+                  placeholder="Select role"
+                  onChange={(e) => {
+                    setStatus(e.currentTarget.value as "NO_MERGE" | "MERGE_WITH_INVOICE" | "MERGE_WITH_ORDER" | "ALREADY_MERGED")
+                    fetchReports({ reset: true })
+                  }}
+                  name="role"
+                  value={status}
+                >
+                  <option value="NO_MERGE">No Merge</option>
+                  <option value="MERGE_WITH_INVOICE">Merge With Invoice</option>
+                  <option value="MERGE_WITH_ORDER">Merge With Order</option>
+                  <option value="ALREADY_MERGED">Merged All</option>
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+            </Box>
+          </Box>
         </Box>
         <Box display='flex' flexDirection='column'>
           <Button bg='#002060' fontWeight='bold' onClick={() => { mergeWithDelivery() }}>Match with  MMTH order</Button>
           <Button bg='#385723' marginTop='20px' fontWeight='bold' onClick={async () => {
-            const response = await exportReports({ monthly: DateTime.fromJSDate(monthly).toFormat('MM/yyyy') })
+            const response = await exportReports({ monthly: DateTime.fromJSDate(monthly).toFormat('MM/yyyy'), status })
             const url = window.URL.createObjectURL(new Blob([response as any]));
             const link = document.createElement('a');
             link.href = url;
@@ -131,46 +156,46 @@ const MonthlyReport = () => {
             </Table.Header>
             <Table.Body>
               {reports?.length ? reports.slice(offset * limit, (offset + 1) * limit).map(report =>
-              <Table.Row key={report.id}>
-                <Table.Cell>{report.plantCode}</Table.Cell>
-                <Table.Cell>{report.venderCode}</Table.Cell>
-                <Table.Cell>{report.delNumber}</Table.Cell>
-                <Table.Cell>{DateTime.fromISO(report.delDate).toFormat('dd/MM/yyyy')} </Table.Cell>
-                <Table.Cell>{report.delPeriod}</Table.Cell>
-                <Table.Cell>{report.delSlideDate}</Table.Cell>
-                <Table.Cell>{report.delSlidePeriod}</Table.Cell>
-                <Table.Cell>{DateTime.fromISO(report.receivedDate).toFormat('dd/MM/yyyy')}</Table.Cell>
-                <Table.Cell>{report.delCtl}</Table.Cell>
-                <Table.Cell>{report.workGroup}</Table.Cell>
-                <Table.Cell>{report.poNo}</Table.Cell>
-                <Table.Cell>{report.materialNo}</Table.Cell>
-                <Table.Cell>{report.materialName}</Table.Cell>
-                <Table.Cell>{report.poQty}</Table.Cell>
-                <Table.Cell>{report.receiveQty}</Table.Cell>
-                <Table.Cell>{report.receiveArea}</Table.Cell>
-                <Table.Cell>{report.followingProc}</Table.Cell>
-                <Table.Cell>{report.privilegeFlag}</Table.Cell>
-                <Table.Cell>{report.barcodeStatus}</Table.Cell>
-                <Table.Cell>{report.tagId}</Table.Cell>
-                <Table.Cell>{report.organizeId}</Table.Cell>
-                <Table.Cell>{report.vatSaleFlag}</Table.Cell>
-                <Table.Cell>{report.invoiceDateShipped}</Table.Cell>
-                <Table.Cell>{report.invoiceInvoiceNo}</Table.Cell>
-                <Table.Cell>{report.invoiceCustomerOrderNumber}</Table.Cell>
-                <Table.Cell>{report.invoicePrice}</Table.Cell>
-                <Table.Cell>{report.invoiceSalesAmount}</Table.Cell>
-                <Table.Cell>{report.deliveryVenderCode}</Table.Cell>
-                <Table.Cell>{report.deliveryPlantCode}</Table.Cell>
-                <Table.Cell>{report.deliveryDeliveryNo}</Table.Cell>
-                <Table.Cell>{report.deliveryDeliveryDate && DateTime.fromISO(report.deliveryDeliveryDate).toFormat('dd/MM/yyyy')}</Table.Cell>
-                <Table.Cell>{report.deliveryPartNo}</Table.Cell>
-                <Table.Cell>{report.deliveryQty && +report.deliveryQty}</Table.Cell>
-                <Table.Cell>{report.deliveryReceiveArea}</Table.Cell>
-                <Table.Cell>{report.deliveryFollowingProc}</Table.Cell>
-                <Table.Cell>{report.deliveryVat}</Table.Cell>
-                <Table.Cell>{report.deliveryPrivilegeFlag}</Table.Cell>
-                <Table.Cell>{report.deliveryReferenceNoTag}</Table.Cell>
-              </Table.Row>) : null}
+                <Table.Row key={report.id}>
+                  <Table.Cell>{report.plantCode}</Table.Cell>
+                  <Table.Cell>{report.venderCode}</Table.Cell>
+                  <Table.Cell>{report.delNumber}</Table.Cell>
+                  <Table.Cell>{DateTime.fromISO(report.delDate).toFormat('dd/MM/yyyy')} </Table.Cell>
+                  <Table.Cell>{report.delPeriod}</Table.Cell>
+                  <Table.Cell>{report.delSlideDate}</Table.Cell>
+                  <Table.Cell>{report.delSlidePeriod}</Table.Cell>
+                  <Table.Cell>{DateTime.fromISO(report.receivedDate).toFormat('dd/MM/yyyy')}</Table.Cell>
+                  <Table.Cell>{report.delCtl}</Table.Cell>
+                  <Table.Cell>{report.workGroup}</Table.Cell>
+                  <Table.Cell>{report.poNo}</Table.Cell>
+                  <Table.Cell>{report.materialNo}</Table.Cell>
+                  <Table.Cell>{report.materialName}</Table.Cell>
+                  <Table.Cell>{report.poQty}</Table.Cell>
+                  <Table.Cell>{report.receiveQty}</Table.Cell>
+                  <Table.Cell>{report.receiveArea}</Table.Cell>
+                  <Table.Cell>{report.followingProc}</Table.Cell>
+                  <Table.Cell>{report.privilegeFlag}</Table.Cell>
+                  <Table.Cell>{report.barcodeStatus}</Table.Cell>
+                  <Table.Cell>{report.tagId}</Table.Cell>
+                  <Table.Cell>{report.organizeId}</Table.Cell>
+                  <Table.Cell>{report.vatSaleFlag}</Table.Cell>
+                  <Table.Cell>{report.invoiceDateShipped}</Table.Cell>
+                  <Table.Cell>{report.invoiceInvoiceNo}</Table.Cell>
+                  <Table.Cell>{report.invoiceCustomerOrderNumber}</Table.Cell>
+                  <Table.Cell>{report.invoicePrice}</Table.Cell>
+                  <Table.Cell>{report.invoiceSalesAmount}</Table.Cell>
+                  <Table.Cell>{report.deliveryVenderCode}</Table.Cell>
+                  <Table.Cell>{report.deliveryPlantCode}</Table.Cell>
+                  <Table.Cell>{report.deliveryDeliveryNo}</Table.Cell>
+                  <Table.Cell>{report.deliveryDeliveryDate && DateTime.fromISO(report.deliveryDeliveryDate).toFormat('dd/MM/yyyy')}</Table.Cell>
+                  <Table.Cell>{report.deliveryPartNo}</Table.Cell>
+                  <Table.Cell>{report.deliveryQty && +report.deliveryQty}</Table.Cell>
+                  <Table.Cell>{report.deliveryReceiveArea}</Table.Cell>
+                  <Table.Cell>{report.deliveryFollowingProc}</Table.Cell>
+                  <Table.Cell>{report.deliveryVat}</Table.Cell>
+                  <Table.Cell>{report.deliveryPrivilegeFlag}</Table.Cell>
+                  <Table.Cell>{report.deliveryReferenceNoTag}</Table.Cell>
+                </Table.Row>) : null}
             </Table.Body>
           </Table.Root>
         </Table.ScrollArea>
