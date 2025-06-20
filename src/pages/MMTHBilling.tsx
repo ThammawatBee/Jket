@@ -129,7 +129,7 @@ const MMTHOrder = () => {
               link.click();
               link.remove();
             }}
-          >Export DIT .xlsx</Button>
+          >{`Export ${search.plantCode}IT .xlsx`}</Button>
           <Button
             marginLeft="25px"
             disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
@@ -144,7 +144,7 @@ const MMTHOrder = () => {
               link.remove();
             }}
           >
-            Export DIT .txt
+            {`Export ${search.plantCode}IT .txt`}
           </Button>
         </Box>
       </Box>
@@ -162,7 +162,7 @@ const MMTHOrder = () => {
             link.click();
             link.remove();
           }}
-        >Export DITT .xlsx</Button>
+        >{`Export ${search.plantCode}ITT .xlsx`}</Button>
         <Button
           marginLeft="25px"
           disabled={isEmpty(pickBy(selectBilling, (billing) => billing))}
@@ -177,7 +177,7 @@ const MMTHOrder = () => {
             link.remove();
           }}
         >
-          Export DITT .txt
+          {`Export ${search.plantCode}ITT .txt`}
         </Button>
       </Box>
     </Box>
