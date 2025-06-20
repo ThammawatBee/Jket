@@ -10,6 +10,7 @@ import useReportStore from "../store/reportStore";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 import PageSizeSelect from "../components/PageSizeSelect";
 import '../DatePicker.css'
+import { Report } from '../interface/Report'
 
 const MonthlyReport = () => {
   const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count, status, setStatus } = useReportStore()
@@ -48,6 +49,19 @@ const MonthlyReport = () => {
     }
   }
 
+  const renderStatus = (report: Report) => {
+    if (report.invoiceInvoiceNo && report.deliveryDeliveryNo) {
+      return 'Merged All'
+    }
+    if (!report.invoiceInvoiceNo && !report.deliveryDeliveryNo) {
+      return 'No Merge'
+    }
+    if (report.invoiceInvoiceNo && !report.deliveryDeliveryNo) {
+      return 'Merge With Invoice'
+    }
+    return 'Merge With Order'
+  }
+
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -79,12 +93,13 @@ const MonthlyReport = () => {
                 <NativeSelect.Field
                   placeholder="Select role"
                   onChange={(e) => {
-                    setStatus(e.currentTarget.value as "NO_MERGE" | "MERGE_WITH_INVOICE" | "MERGE_WITH_ORDER" | "ALREADY_MERGED")
+                    setStatus(e.currentTarget.value as "ALL" | "NO_MERGE" | "MERGE_WITH_INVOICE" | "MERGE_WITH_ORDER" | "ALREADY_MERGED")
                     fetchReports({ reset: true })
                   }}
                   name="role"
                   value={status}
                 >
+                  <option value="ALL">All</option>
                   <option value="NO_MERGE">No Merge</option>
                   <option value="MERGE_WITH_INVOICE">Merge With Invoice</option>
                   <option value="MERGE_WITH_ORDER">Merge With Order</option>
@@ -114,6 +129,7 @@ const MonthlyReport = () => {
           <Table.Root size="md" showColumnBorder stickyHeader>
             <Table.Header>
               <Table.Row background={"#F6F6F6"}>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
                 <Table.ColumnHeader>Plant Code</Table.ColumnHeader>
                 <Table.ColumnHeader>Vendor Code</Table.ColumnHeader>
                 <Table.ColumnHeader>Del No</Table.ColumnHeader>
@@ -157,6 +173,7 @@ const MonthlyReport = () => {
             <Table.Body>
               {reports?.length ? reports.slice(offset * limit, (offset + 1) * limit).map(report =>
                 <Table.Row key={report.id}>
+                  <Table.Cell>{renderStatus(report)}</Table.Cell>
                   <Table.Cell>{report.plantCode}</Table.Cell>
                   <Table.Cell>{report.venderCode}</Table.Cell>
                   <Table.Cell>{report.delNumber}</Table.Cell>

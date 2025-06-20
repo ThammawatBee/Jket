@@ -13,9 +13,9 @@ interface ReportState {
   limit: number
   fetchReports: (options?: { limit?: number, offset?: number, changePage?: boolean, reset?: boolean }) => Promise<void>
   monthly: Date
-  status: 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED'
+  status: 'ALL' | 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED'
   setMonthly: (monthly: Date) => void
-  setStatus: (status: 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED') => void
+  setStatus: (status: 'ALL' | 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED') => void
   onPageChange: (page: number) => Promise<void>
   onPageSizeChange: (pageSize: number) => Promise<void>
 }
@@ -29,7 +29,7 @@ const useReportStore = create<ReportState>()(
     isLoading: false,
     error: null,
     monthly: new Date(),
-    status: 'NO_MERGE',
+    status: 'ALL',
     search: {},
 
     fetchReports: async (options?: { limit?: number, offset?: number, reset?: boolean, changePage?: boolean }) => {
