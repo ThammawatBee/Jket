@@ -32,7 +32,7 @@ const UserDialog = ({ isOpenDialog, setOpenDialog }: UserDialogProps) => {
         await createUser({
           ...value,
         })
-        SuccessToast("Create equipment success")
+        SuccessToast("Create User success")
         setOpenDialog(false)
       } catch (error: any) {
         const errorData = error.data as ServiceError
