@@ -124,7 +124,7 @@ const MMTHOrder = () => {
               const url = window.URL.createObjectURL(new Blob([response as any]));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `${search.plantCode}IT.xlsx`);
+              link.setAttribute('download', `${search.plantCode}IT043.xlsx`);
               document.body.appendChild(link);
               link.click();
               link.remove();
@@ -138,7 +138,7 @@ const MMTHOrder = () => {
               const url = window.URL.createObjectURL(new Blob([response as any]));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `${search.plantCode}IT.txt`);
+              link.setAttribute('download', `${search.plantCode}IT043.txt`);
               document.body.appendChild(link);
               link.click();
               link.remove();
@@ -157,7 +157,7 @@ const MMTHOrder = () => {
             const url = window.URL.createObjectURL(new Blob([response as any]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `${search.plantCode}ITT.xlsx`);
+            link.setAttribute('download', `${search.plantCode}ITT043.xlsx`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -171,7 +171,7 @@ const MMTHOrder = () => {
             const url = window.URL.createObjectURL(new Blob([response as any]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `${search.plantCode}ITT.txt`);
+            link.setAttribute('download', `${search.plantCode}ITT043.txt`);
             document.body.appendChild(link);
             link.click();
             link.remove();

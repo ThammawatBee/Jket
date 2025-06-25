@@ -88,7 +88,7 @@ const MonthlyReport = () => {
               />
             </Box>
             <Box marginLeft={'20px'}>
-              <Text marginBottom={"10px"}>Select Monthly</Text>
+              <Text marginBottom={"10px"}>Select Status</Text>
               <NativeSelect.Root>
                 <NativeSelect.Field
                   placeholder="Select role"
