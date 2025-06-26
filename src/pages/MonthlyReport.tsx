@@ -13,7 +13,7 @@ import '../DatePicker.css'
 import { Report } from '../interface/Report'
 
 const MonthlyReport = () => {
-  const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count, status, setStatus } = useReportStore()
+  const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count, status, setStatus, plantCode, setPlantCode } = useReportStore()
   useEffect(() => {
     if (!reports) {
       fetchReports()
@@ -104,6 +104,28 @@ const MonthlyReport = () => {
                   <option value="MERGE_WITH_INVOICE">Merge With Invoice</option>
                   <option value="MERGE_WITH_ORDER">Merge With Order</option>
                   <option value="ALREADY_MERGED">Merged All</option>
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+            </Box>
+            <Box marginLeft={'20px'}>
+              <Text marginBottom={"10px"}>Select Plant Code</Text>
+              <NativeSelect.Root>
+                <NativeSelect.Field
+                  placeholder="Select Plant Code"
+                  onChange={(e) => {
+                    setPlantCode(e.currentTarget.value)
+                    fetchReports({ reset: true })
+                  }}
+                  name="plantCode"
+                  value={plantCode}
+                >
+                  <option value="ALL">All</option>
+                  <option value="B">B</option>
+                  <option value="D">D</option>
+                  <option value="F">F</option>
+                  <option value="G">G</option>
+                  <option value="H">H</option>
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />
               </NativeSelect.Root>

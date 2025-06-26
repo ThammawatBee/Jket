@@ -13,11 +13,13 @@ interface ReportState {
   limit: number
   fetchReports: (options?: { limit?: number, offset?: number, changePage?: boolean, reset?: boolean }) => Promise<void>
   monthly: Date
-  status: 'ALL' | 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED'
+  status: 'ALL' | 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED',
+  plantCode?: string
   setMonthly: (monthly: Date) => void
   setStatus: (status: 'ALL' | 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED') => void
   onPageChange: (page: number) => Promise<void>
   onPageSizeChange: (pageSize: number) => Promise<void>
+  setPlantCode: (plantCode: string) => void,
 }
 
 const useReportStore = create<ReportState>()(
@@ -31,6 +33,7 @@ const useReportStore = create<ReportState>()(
     monthly: new Date(),
     status: 'ALL',
     search: {},
+    plantCode: 'ALL',
 
     fetchReports: async (options?: { limit?: number, offset?: number, reset?: boolean, changePage?: boolean }) => {
       set({ isLoading: true, error: null });
@@ -39,12 +42,14 @@ const useReportStore = create<ReportState>()(
         const offset = options?.offset || get().offset
         const monthly = get().monthly
         const status = get().status
+        const plantCode = get().plantCode
         const currentReports = get().reports
         const response = await listReports({
           limit,
           offset: options?.reset ? 0 : offset,
           monthly: DateTime.fromJSDate(monthly).toFormat('MM/yyyy'),
           status,
+          plantCode,
         });
         set({
           reports: options?.changePage ?
@@ -59,6 +64,7 @@ const useReportStore = create<ReportState>()(
     },
     setMonthly: (date: Date) => { set({ monthly: date }) },
     setStatus: (status: 'NO_MERGE' | 'MERGE_WITH_INVOICE' | 'MERGE_WITH_ORDER' | 'ALREADY_MERGED') => { set({ status }) },
+    setPlantCode: (plantCode: string) => { set({ plantCode }) },
     onPageChange: async (page: number) => {
       const reports = get().reports
       const limit = get().limit

@@ -22,6 +22,8 @@ interface ReportState {
   onPageChange: (page: number) => Promise<void>
   onPageSizeChange: (pageSize: number) => Promise<void>
   setSearch: (input: DeliveryReportSearch) => void
+  plantCode: string
+  setPlantCode: (plantCode: string) => void
 }
 
 export const generateParam = (search: DeliveryReportSearch) => {
@@ -40,6 +42,8 @@ const useDeliveryStore = create<ReportState>()(
     error: null,
     monthly: new Date(),
     search: {},
+    plantCode: 'ALL',
+
 
     fetchDeliveryReports: async (options?: { limit?: number, offset?: number, reset?: boolean, changePage?: boolean }) => {
       set({ isLoading: true, error: null });
@@ -48,10 +52,12 @@ const useDeliveryStore = create<ReportState>()(
         const offset = options?.offset || get().offset
         const currentDeliveryReports = get().deliveryReports
         const search = get().search
+        const plantCode = get().plantCode
         const response = await listDeliveryReports({
           limit,
           offset: options?.reset ? 0 : offset,
           ...generateParam(search),
+          plantCode,
         });
         set({
           deliveryReports: options?.changePage ?
@@ -83,6 +89,7 @@ const useDeliveryStore = create<ReportState>()(
       const currentSearch = get().search
       set({ search: { ...currentSearch, ...input } })
     },
+    setPlantCode: (plantCode: string) => { set({ plantCode }) },
     onPageSizeChange: async (pageSize: number) => {
       const { search } = get()
       const response = await listDeliveryReports({

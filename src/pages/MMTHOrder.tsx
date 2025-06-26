@@ -1,5 +1,5 @@
 import AppBar from "../components/AppBar"
-import { Box, Button, ButtonGroup, IconButton, Input, Pagination, Table, Text } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, IconButton, Input, NativeSelect, Pagination, Table, Text } from "@chakra-ui/react"
 import DatePicker from "react-datepicker"
 import { useEffect } from "react";
 import useDeliveryStore, { generateParam } from "../store/deliveryStore";
@@ -9,7 +9,7 @@ import { DateTime } from "luxon";
 import { exportDeliveryReports } from "../service/jket";
 
 const MMTHOrder = () => {
-  const { deliveryReports, fetchDeliveryReports, search, offset, count, limit, onPageChange, onPageSizeChange, setSearch } = useDeliveryStore()
+  const { deliveryReports, fetchDeliveryReports, search, offset, count, limit, onPageChange, onPageSizeChange, setSearch, plantCode, setPlantCode } = useDeliveryStore()
   useEffect(() => {
     if (!deliveryReports) {
       fetchDeliveryReports()
@@ -34,31 +34,55 @@ const MMTHOrder = () => {
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
+      <Text marginBottom={"20px"} textStyle={'xl'} color={'#1A69AA'} fontWeight='bold'>MMTH Order</Text>
       <Box display='flex' justifyContent='space-between' alignItems={'end'}>
-        <Box>
-          <Text marginBottom={"20px"} textStyle={'xl'} color={'#1A69AA'} fontWeight='bold'>MMTH Order</Text>
-          <DatePicker
-            dateFormat="dd-MM-yyyy"
-            showMonthDropdown
-            showYearDropdown
-            isClearable
-            onChange={(dates) => {
-              const [start, end] = dates
-              setSearch({
-                dateStart: start,
-                dateEnd: end
-              })
-            }}
+        <Box display='flex' alignItems={'end'}>
+          <Box>
+            <Text marginBottom={"10px"}>Select Date Range</Text>
+            <DatePicker
+              dateFormat="dd-MM-yyyy"
+              showMonthDropdown
+              showYearDropdown
+              isClearable
+              onChange={(dates) => {
+                const [start, end] = dates
+                setSearch({
+                  dateStart: start,
+                  dateEnd: end
+                })
+              }}
 
-            selectsRange={true}
-            startDate={search.dateStart}
-            endDate={search.dateEnd}
-            onKeyDown={(e) => e.preventDefault()}
-            customInput={<Input
-              width={'240px'}
-              readOnly={true}
-              background={'white'} />}
-          />
+              selectsRange={true}
+              startDate={search.dateStart}
+              endDate={search.dateEnd}
+              onKeyDown={(e) => e.preventDefault()}
+              customInput={<Input
+                width={'240px'}
+                readOnly={true}
+                background={'white'} />}
+            />
+          </Box>
+          <Box marginLeft={'20px'}>
+            <Text marginBottom={"10px"}>Select Plant Code</Text>
+            <NativeSelect.Root>
+              <NativeSelect.Field
+                placeholder="Select Plant Code"
+                onChange={(e) => {
+                  setPlantCode(e.currentTarget.value)
+                }}
+                name="plantCode"
+                value={plantCode}
+              >
+                <option value="ALL">All</option>
+                <option value="B">B</option>
+                <option value="D">D</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+                <option value="H">H</option>
+              </NativeSelect.Field>
+              <NativeSelect.Indicator />
+            </NativeSelect.Root>
+          </Box>
         </Box>
         <Box display='flex' flexDirection='column'>
           <Button bg='#385723' marginTop='20px' fontWeight='bold'
