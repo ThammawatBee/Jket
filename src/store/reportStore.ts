@@ -82,10 +82,14 @@ const useReportStore = create<ReportState>()(
     },
     onPageSizeChange: async (pageSize: number) => {
       const monthly = get().monthly
+      const status = get().status
+      const plantCode = get().plantCode
       const response = await listReports({
         limit: pageSize,
         offset: 0,
         monthly: DateTime.fromJSDate(monthly).toFormat('MM/yyyy'),
+        status,
+        plantCode,
       });
       set({ reports: response.reports, count: response.count, offset: 0, limit: pageSize });
     },
