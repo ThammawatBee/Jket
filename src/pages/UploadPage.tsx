@@ -1,5 +1,5 @@
 import AppBar from "../components/AppBar"
-import { Box, Button, FileUpload, Icon, Text, useFileUpload, useFileUploadContext } from "@chakra-ui/react"
+import { Box, FileUpload, Text, useFileUpload } from "@chakra-ui/react"
 import Invoice from '../assets/image/Invoice.png'
 import MMTHOrder from '../assets/image/MMTHOrder.png'
 import MMTHRecieve from '../assets/image/MMTHRecieve.png'
@@ -10,22 +10,23 @@ import unionBy from 'lodash/unionBy'
 import { DeliveryMapper, InvoiceMapper, ReceiveMapper } from "../helper/mapFileData"
 import { createDeliveryReports, createReports, uploadInvoice } from "../service/jket"
 import { toast } from "react-toastify"
-import { LuUpload } from "react-icons/lu"
-import { checkErrorReportUploadHeader, selectFileHeaders } from "../helper/checkFileHeader"
+import { checkErrorReportUploadHeader } from "../helper/checkFileHeader"
 import reverse from "lodash/reverse"
 import uniqBy from "lodash/unionBy"
 import useReportStore from "../store/reportStore"
 import useDeliveryStore from "../store/deliveryStore"
+import Receive from "../components/Receive"
+import InvoiceComponent from "../components/Invoice"
+import Order from "../components/Order"
 
 const UploadPage = () => {
   const [section, setSection] = useState("init")
   const [receiveFiles, setReceiveFiles] = useState<File[]>([])
   const [invoiceFiles, setInvoiceFiles] = useState<File[]>([])
   const [deliveryReportFiles, setDeliveryReportFiles] = useState<File[]>([])
-  const fileUpload = useFileUpload({})
   const { fetchReports } = useReportStore()
   const { fetchDeliveryReports } = useDeliveryStore()
-
+  const fileUpload = useFileUpload()
 
   const handleUploadXlsFile = (file: File, type: string) => {
     const reader = new FileReader();
@@ -168,176 +169,45 @@ const UploadPage = () => {
 
   const renderSection = () => {
     if (section === "receiveFile") {
-      return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
-        <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
-        <FileUpload.Root maxFiles={20} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
-          if (file.acceptedFiles?.length) {
-            setReceiveFiles(unionBy(file.acceptedFiles, "name"))
+      return <FileUpload.Root maxFiles={20}
+        accept={['.xls', '.xlsx']}
+        onFileAccept={async (file) => {
+          if (file.files?.length) {
+            setReceiveFiles(unionBy(file.files, "name"))
           }
         }}>
-          <Box marginTop={'25px'} display='flex' justifyContent='space-between' width="100%">
-            <Box>
-              <Text textStyle={'xl'} color={'#1A69AA'}>Upload</Text>
-              <Text textStyle={'xl'} color={'#1A69AA'}>MMTH Receive file</Text>
-            </Box>
-            <Box>
-              <FileUpload.HiddenInput />
-              <FileUpload.Trigger asChild>
-                <Button variant="solid" size="sm">
-                  Upload file
-                </Button>
-              </FileUpload.Trigger>
-            </Box>
-          </Box>
-          <Box width="100%">
-            <FileUpload.HiddenInput />
-            <FileUpload.Dropzone>
-              <Icon size="md" color="fg.muted">
-                <LuUpload />
-              </Icon>
-              <FileUpload.DropzoneContent>
-                <Box>Drag and drop files here</Box>
-              </FileUpload.DropzoneContent>
-            </FileUpload.Dropzone>
-          </Box>
-          {
-            receiveFiles.length ? receiveFiles.map(receiveFile =>
-              <FileUpload.Item key={receiveFile.name} file={receiveFile}>
-                <FileUpload.ItemPreview />
-                <FileUpload.ItemName />
-                <FileUpload.ItemDeleteTrigger marginLeft={"auto"}
-                  onClick={() => {
-                    setReceiveFiles(receiveFiles.filter(file => file.name !== receiveFile.name))
-                  }}
-                />
-              </FileUpload.Item>
-            )
-              : null
-          }
-        </FileUpload.Root>
-        <Box>
-          <Button variant="solid" marginTop={"20px"} disabled={receiveFiles.length === 0} onClick={async () => {
-            for (const file of receiveFiles) {
-              handleUploadXlsFile(file, "report")
-            }
-
-          }}>Confirm Upload</Button>
-        </Box>
-      </Box>
+        <Receive
+          receiveFiles={receiveFiles}
+          setSection={setSection}
+          handleUploadXlsFile={handleUploadXlsFile}
+          setReceiveFiles={setReceiveFiles} />
+      </FileUpload.Root>
     }
     else if (section === 'invoice') {
-      return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
-        <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
-        <FileUpload.Root maxFiles={20} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
-          if (file.acceptedFiles?.length) {
-            setInvoiceFiles(unionBy(file.acceptedFiles, "name"))
-          }
-        }}>
-          <Box marginTop={'25px'} display='flex' justifyContent='space-between' width="100%">
-            <Box>
-              <Text textStyle={'xl'} color={'#1A69AA'}>Upload</Text>
-              <Text textStyle={'xl'} color={'#1A69AA'}>Invoice</Text>
-            </Box>
-            <Box>
-              <FileUpload.HiddenInput />
-              <FileUpload.Trigger asChild>
-                <Button variant="outline" size="sm">
-                  Upload file
-                </Button>
-              </FileUpload.Trigger>
-            </Box>
-          </Box>
-          <Box width="100%">
-            <FileUpload.HiddenInput />
-            <FileUpload.Dropzone>
-              <Icon size="md" color="fg.muted">
-                <LuUpload />
-              </Icon>
-              <FileUpload.DropzoneContent>
-                <Box>Drag and drop files here</Box>
-              </FileUpload.DropzoneContent>
-            </FileUpload.Dropzone>
-          </Box>
-          {
-            invoiceFiles.length ? invoiceFiles.map(invoiceFile =>
-              <FileUpload.Item key={invoiceFile.name} file={invoiceFile}>
-                <FileUpload.ItemPreview />
-                <FileUpload.ItemName />
-                <FileUpload.ItemDeleteTrigger marginLeft={"auto"}
-                  onClick={() => {
-                    setInvoiceFiles(invoiceFiles.filter(file => file.name !== invoiceFile.name))
-                  }}
-                />
-              </FileUpload.Item>
-            )
-              : null
-          }
-        </FileUpload.Root>
-        <Box>
-          <Button variant="solid" marginTop={"20px"} disabled={invoiceFiles.length === 0} onClick={async () => {
-            for (const file of invoiceFiles) {
-              handleUploadXlsFile(file, "invoice")
-            }
-          }}>Confirm Upload</Button>
-        </Box>
-      </Box>
+      return <FileUpload.Root maxFiles={20} accept={['.xls', '.xlsx']} onFileChange={async (file) => {
+        if (file.acceptedFiles?.length) {
+          setInvoiceFiles(unionBy(file.acceptedFiles, "name"))
+        }
+      }}>
+        <InvoiceComponent
+          invoiceFiles={invoiceFiles}
+          setSection={setSection}
+          handleUploadXlsFile={handleUploadXlsFile}
+          setInvoiceFiles={setInvoiceFiles} />
+      </FileUpload.Root>
     }
     else if (section === 'orderFile') {
-      return <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
-        <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
-        <FileUpload.Root maxFiles={20} accept={'.txt'} onFileChange={async (file) => {
-          if (file.acceptedFiles?.length) {
-            setDeliveryReportFiles(unionBy(file.acceptedFiles, "name"))
-          }
-        }}>
-          <Box marginTop={'25px'} display='flex' justifyContent='space-between' width="100%">
-            <Box>
-              <Text textStyle={'xl'} color={'#1A69AA'}>Upload</Text>
-              <Text textStyle={'xl'} color={'#1A69AA'}>MMTH Order file</Text>
-            </Box>
-            <Box>
-              <FileUpload.HiddenInput />
-              <FileUpload.Trigger asChild>
-                <Button variant="outline" size="sm">
-                  Upload file
-                </Button>
-              </FileUpload.Trigger>
-            </Box>
-          </Box>
-          <Box width="100%">
-            <FileUpload.HiddenInput />
-            <FileUpload.Dropzone>
-              <Icon size="md" color="fg.muted">
-                <LuUpload />
-              </Icon>
-              <FileUpload.DropzoneContent>
-                <Box>Drag and drop files here</Box>
-              </FileUpload.DropzoneContent>
-            </FileUpload.Dropzone>
-          </Box>
-          {
-            deliveryReportFiles.length ? deliveryReportFiles.map(deliveryReportFile =>
-              <FileUpload.Item key={deliveryReportFile.name} file={deliveryReportFile}>
-                <FileUpload.ItemPreview />
-                <FileUpload.ItemName />
-                <FileUpload.ItemDeleteTrigger marginLeft={"auto"}
-                  onClick={() => {
-                    setDeliveryReportFiles(deliveryReportFiles.filter(file => file.name !== deliveryReportFile.name))
-                  }}
-                />
-              </FileUpload.Item>
-            )
-              : null
-          }
-        </FileUpload.Root>
-        <Box>
-          <Button variant="solid" marginTop={"20px"} disabled={deliveryReportFiles.length === 0} onClick={async () => {
-            for (const file of deliveryReportFiles) {
-              handleUploadTxtFile(file)
-            }
-          }}>Confirm Upload</Button>
-        </Box>
-      </Box>
+      return <FileUpload.Root maxFiles={20} accept={'.txt'} onFileChange={async (file) => {
+        if (file.acceptedFiles?.length) {
+          setDeliveryReportFiles(unionBy(file.acceptedFiles, "name"))
+        }
+      }}>
+        <Order deliveryReportFiles={deliveryReportFiles}
+          setSection={setSection}
+          handleUploadTxtFile={handleUploadTxtFile}
+          setDeliveryReportFiles={setDeliveryReportFiles}
+        />
+      </FileUpload.Root>
     }
     return <Box height={'60.5vh'} display='flex' flexDirection='column' alignItems='center' justifyContent='center'>
       <Box display='flex' alignItems='center' justifyContent='center' marginTop={'50px'}>

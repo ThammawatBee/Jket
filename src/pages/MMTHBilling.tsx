@@ -18,6 +18,7 @@ const MMTHOrder = () => {
 
   return <Box>
     <AppBar />
+
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
       <Text marginBottom={"20px"} textStyle={'xl'} color={'#1A69AA'} fontWeight='bold'>MMTH Billing</Text>
       <Box display='flex'>
@@ -95,7 +96,7 @@ const MMTHOrder = () => {
         marginTop="20px"
         disabled={!search.endDate || !search.startDate}
       >Search</Button>
-      <Box marginTop="20px" display='fex' flexWrap='wrap'>
+      <Box marginTop="20px" display='flex' flexWrap='wrap'>
         {
           billings?.length ? billings.map(billing => {
             return <Box width={'20%'} marginTop="10px">
