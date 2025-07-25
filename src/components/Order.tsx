@@ -1,15 +1,17 @@
+import useDeliveryStore from "../store/deliveryStore"
 import { Box, FileUpload, Text, Button, Icon, useFileUploadContext } from "@chakra-ui/react"
 import { LuUpload } from "react-icons/lu"
 
 interface Props {
   deliveryReportFiles: File[],
   setSection: (section: string) => void,
-  handleUploadTxtFile: (file: File) => void,
+  handleUploadTxtFile: (file: File) => Promise<boolean>,
   setDeliveryReportFiles: (file: File[]) => void,
 }
 
 const Order = ({ deliveryReportFiles, setSection, handleUploadTxtFile, setDeliveryReportFiles }: Props) => {
   const upload = useFileUploadContext()
+  const { fetchDeliveryReports } = useDeliveryStore()
 
   return <Box width={"100%"} paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
     <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
@@ -60,11 +62,18 @@ const Order = ({ deliveryReportFiles, setSection, handleUploadTxtFile, setDelive
     }
     <Box>
       <Button variant="solid" marginTop={"20px"} disabled={deliveryReportFiles.length === 0} onClick={async () => {
+        let isUploadError = false
         for (const file of deliveryReportFiles) {
-          handleUploadTxtFile(file)
+          const result = await handleUploadTxtFile(file)
+          if (result) {
+            isUploadError = true
+          }
         }
-        upload.clearFiles()
-        setDeliveryReportFiles([])
+        if (!isUploadError) {
+          upload.clearFiles()
+          setDeliveryReportFiles([])
+          fetchDeliveryReports({ reset: true })
+        }
       }}>Confirm Upload</Button>
     </Box>
   </Box>

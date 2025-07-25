@@ -13,8 +13,6 @@ import { toast } from "react-toastify"
 import { checkErrorReportUploadHeader } from "../helper/checkFileHeader"
 import reverse from "lodash/reverse"
 import uniqBy from "lodash/unionBy"
-import useReportStore from "../store/reportStore"
-import useDeliveryStore from "../store/deliveryStore"
 import Receive from "../components/Receive"
 import InvoiceComponent from "../components/Invoice"
 import Order from "../components/Order"
@@ -24,94 +22,88 @@ const UploadPage = () => {
   const [receiveFiles, setReceiveFiles] = useState<File[]>([])
   const [invoiceFiles, setInvoiceFiles] = useState<File[]>([])
   const [deliveryReportFiles, setDeliveryReportFiles] = useState<File[]>([])
-  const { fetchReports } = useReportStore()
-  const { fetchDeliveryReports } = useDeliveryStore()
   const fileUpload = useFileUpload()
 
-  const handleUploadXlsFile = (file: File, type: string) => {
+  const handleUploadXlsFile = async (file: File, type: string): Promise<boolean> => {
     const reader = new FileReader();
-    let isUploadError = false
-    let isCheckHeader = false
-    reader.onload = (e) => {
-      const data = e.target?.result;
-      const workbook = XLSX.read(data, { type: 'array' });
 
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const csv = XLSX.utils.sheet_to_csv(sheet); // ✅ Convert to CSV string
+    return new Promise((resolve, reject) => {
+      let isUploadError = false
+      let isCheckHeader = false
+      reader.onload = (e) => {
+        const data = e.target?.result;
+        const workbook = XLSX.read(data, { type: 'array' });
 
-      // Now stream parse this CSV with PapaParse
-      Papa.parse(csv, {
-        header: true,
-        chunkSize: 1024 * 1024, // 1MB chunk
-        chunk: async (results: Papa.ParseResult<any>, parser: Papa.Parser) => {
-          parser.pause();
-          const headers = results.meta?.fields
-          if (!isCheckHeader && (!headers?.length || checkErrorReportUploadHeader(headers, type))) {
-            isUploadError = true
-            parser.abort(); // Stop processing further
-            toastUploadFileError(`Please check ${file.name} upload header file`)
-            return
-          }
-          isCheckHeader = true
-          try {
-            if (type === 'report') {
-              await createReports(results.data.map(data => ReceiveMapper(data)))
-            }
-            if (type === 'invoice') {
-              await uploadInvoice(reverse(uniqBy(reverse(results.data.map(data => InvoiceMapper(data))), 'customerOrderNumber')))
-            }
-            parser.resume(); // Resume parsing after successful upload
-          } catch (error: any) {
-            parser.pause()
-            isUploadError = true
-            parser.abort(); // Stop processing further
-            let errorMessage = ''
-            if (error?.data?.detail) {
-              errorMessage = `Upload ${file.name} fail cause ${error?.data?.detail}`
-            }
-            else if (error?.data?.message === 'Validation failed') {
-              errorMessage = `Upload ${file.name} fail cause Validation failed`
-            }
-            else {
-              errorMessage = `Upload ${file.name} fail please check file upload`
-            }
-            toastUploadFileError(errorMessage)
-            return
-          }
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const csv = XLSX.utils.sheet_to_csv(sheet); // ✅ Convert to CSV string
 
-        },
-        complete: () => {
-          if (!isUploadError) {
-            toast.success(type === 'report' ? `Upload Receive ${file.name} success` : `Upload Invoice ${file.name} success`, {
-              style: { color: '#18181B' },
-              position: "top-right",
-              autoClose: 3500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "light",
-            });
-            isUploadError = false
-            isCheckHeader = false
-            if (type === 'report') {
-              setReceiveFiles(receiveFiles.filter(receiveFile => receiveFile.name !== file.name))
-              fetchReports({ reset: true })
-            } else {
-              setInvoiceFiles(invoiceFiles.filter(invoiceFile => file.name !== invoiceFile.name))
-              fetchReports({ reset: true })
+        // Now stream parse this CSV with PapaParse
+        Papa.parse(csv, {
+          header: true,
+          chunkSize: 1024 * 1024, // 1MB chunk
+          chunk: async (results: Papa.ParseResult<any>, parser: Papa.Parser) => {
+            parser.pause();
+            const headers = results.meta?.fields
+            if (!isCheckHeader && (!headers?.length || checkErrorReportUploadHeader(headers, type))) {
+              isUploadError = true
+              parser.abort(); // Stop processing further
+              toastUploadFileError(`Please check ${file.name} upload header file`)
+              return
             }
-          }
-        },
-        error: (error: any) => {
-          // setUploadLoading(false)
-          console.log('Error parsing CSV:', error);
-        },
-      });
-    };
+            isCheckHeader = true
+            try {
+              if (type === 'report') {
+                await createReports(results.data.map(data => ReceiveMapper(data)).filter(report => report.venderCode === 'T043'))
+              }
+              if (type === 'invoice') {
+                await uploadInvoice(reverse(uniqBy(reverse(results.data.map(data => InvoiceMapper(data))), 'customerOrderNumber')))
+              }
+              parser.resume(); // Resume parsing after successful upload
+            } catch (error: any) {
+              parser.pause()
+              isUploadError = true
+              parser.abort(); // Stop processing further
+              let errorMessage = ''
+              if (error?.data?.detail) {
+                errorMessage = `Upload ${file.name} fail cause ${error?.data?.detail}`
+              }
+              else if (error?.data?.message === 'Validation failed') {
+                errorMessage = `Upload ${file.name} fail cause Validation failed`
+              }
+              else {
+                errorMessage = `Upload ${file.name} fail please check file upload`
+              }
+              toastUploadFileError(errorMessage)
+              resolve(true); // resolve with error
+            }
 
-    reader.readAsArrayBuffer(file);
+          },
+          complete: () => {
+            if (!isUploadError) {
+              toast.success(type === 'report' ? `Upload Receive ${file.name} success` : `Upload Invoice ${file.name} success`, {
+                style: { color: '#18181B' },
+                position: "top-right",
+                autoClose: 3500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+              });
+              isUploadError = false
+              isCheckHeader = false
+            }
+            resolve(isUploadError);
+          },
+          error: (error: any) => {
+            // setUploadLoading(false)
+            console.log('Error parsing CSV:', error);
+          },
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    })
   }
 
   const toastUploadFileError = (message: string) => {
@@ -128,43 +120,45 @@ const UploadPage = () => {
     });
   }
 
-  const handleUploadTxtFile = (file: File) => {
+  const handleUploadTxtFile = async (file: File): Promise<boolean> => {
     const reader = new FileReader();
 
-    reader.onload = async (event) => {
-      const content = event.target?.result as string;
-      const data = DeliveryMapper(content)
-      try {
-        await createDeliveryReports(data)
-        toast.success(`Upload Delivery ${file.name} success`, {
-          style: { color: '#18181B' },
-          position: "top-right",
-          autoClose: 3500,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        })
-        setDeliveryReportFiles(deliveryReportFiles.filter(deliveryReportFile => deliveryReportFile.name !== file.name))
-        fetchDeliveryReports({ reset: true })
-      } catch (error: any) {
-        let errorMessage = ''
-        if (error?.data?.detail) {
-          errorMessage = `Upload ${file.name} fail cause ${error?.data?.detail}`
+    return new Promise((resolve, reject) => {
+      reader.onload = async (event) => {
+        const content = event.target?.result as string;
+        const data = DeliveryMapper(content)
+        try {
+          await createDeliveryReports(data)
+          toast.success(`Upload Delivery ${file.name} success`, {
+            style: { color: '#18181B' },
+            position: "top-right",
+            autoClose: 3500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          })
+          resolve(false); // success → no error
+        } catch (error: any) {
+          let errorMessage = ''
+          if (error?.data?.detail) {
+            errorMessage = `Upload ${file.name} fail cause ${error?.data?.detail}`
+          }
+          else if (error?.data?.message === 'Validation failed') {
+            errorMessage = `Upload ${file.name} fail cause Validation failed`
+          }
+          else {
+            errorMessage = `Upload ${file.name} fail please check file upload`
+          }
+          toastUploadFileError(errorMessage)
+          resolve(true); // error occurred
         }
-        else if (error?.data?.message === 'Validation failed') {
-          errorMessage = `Upload ${file.name} fail cause Validation failed`
-        }
-        else {
-          errorMessage = `Upload ${file.name} fail please check file upload`
-        }
-        toastUploadFileError(errorMessage)
-      }
-    };
+      };
 
-    reader.readAsText(file);
+      reader.readAsText(file);
+    });
   }
 
   const renderSection = () => {

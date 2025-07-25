@@ -1,3 +1,4 @@
+import useReportStore from "../store/reportStore"
 import { Box, FileUpload, Text, Button, Icon, useFileUploadContext } from "@chakra-ui/react"
 import unionBy from "lodash/unionBy"
 import { LuUpload } from "react-icons/lu"
@@ -5,12 +6,13 @@ import { LuUpload } from "react-icons/lu"
 interface Props {
   invoiceFiles: File[],
   setSection: (section: string) => void,
-  handleUploadXlsFile: (file: File, type: string) => void,
+  handleUploadXlsFile: (file: File, type: string) => Promise<boolean>,
   setInvoiceFiles: (file: File[]) => void,
 }
 
 const InvoiceComponent = ({ invoiceFiles, setSection, handleUploadXlsFile, setInvoiceFiles }: Props) => {
   const upload = useFileUploadContext()
+  const { fetchReports } = useReportStore()
 
   return <Box width={"100%"} paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
     <Button variant='outline' onClick={() => setSection('init')}>Back</Button>
@@ -65,10 +67,18 @@ const InvoiceComponent = ({ invoiceFiles, setSection, handleUploadXlsFile, setIn
     </FileUpload.Root>
     <Box>
       <Button variant="solid" marginTop={"20px"} disabled={invoiceFiles.length === 0} onClick={async () => {
+        let isUploadError = false
         for (const file of invoiceFiles) {
-          handleUploadXlsFile(file, "invoice")
+          const result = await handleUploadXlsFile(file, "invoice")
+          if (result) {
+            isUploadError = true
+          }
         }
-        setInvoiceFiles([])
+        if (!isUploadError) {
+          upload.clearFiles()
+          setInvoiceFiles([])
+          fetchReports({ reset: true })
+        }
       }}>Confirm Upload</Button>
     </Box>
   </Box>
