@@ -13,10 +13,11 @@ import '../DatePicker.css'
 import { Report } from '../interface/Report'
 
 const MonthlyReport = () => {
-  const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count, status, setStatus, plantCode, setPlantCode } = useReportStore()
+  const { reports, fetchReports, monthly, setMonthly, limit, onPageSizeChange, onPageChange, offset, count, status, setStatus, plantCode, setPlantCode, getSummaryReport, summaryReport } = useReportStore()
   useEffect(() => {
     if (!reports) {
       fetchReports()
+      getSummaryReport()
     }
   }, [])
   const mergeWithDelivery = async () => {
@@ -33,6 +34,7 @@ const MonthlyReport = () => {
       theme: "light",
     });
     await fetchReports({ reset: true })
+    await getSummaryReport()
   }
   const selectHeight = () => {
     if (limit === 10) {
@@ -62,6 +64,20 @@ const MonthlyReport = () => {
     return 'Merge With Order'
   }
 
+  const COL1W = 160;
+  const COL2W = 160;
+  const COL3W = 160;
+  const COL4W = 160;
+  const COL5W = 160;
+
+  // cumulative left offsets
+  const L1 = 0;
+  const L2 = L1 + COL1W;
+  const L3 = L2 + COL2W;
+  const L4 = L3 + COL3W;
+  const L5 = L4 + COL4W;
+
+
   return <Box>
     <AppBar />
     <Box paddingLeft={"15vh"} paddingRight={"15vh"} paddingTop={"10vh"} paddingBottom={"10vh"}>
@@ -78,6 +94,7 @@ const MonthlyReport = () => {
                   if (date) {
                     setMonthly(date)
                     fetchReports({ reset: true })
+                    getSummaryReport()
                   }
                 }}
                 dateFormat="MM/yyyy"
@@ -130,6 +147,19 @@ const MonthlyReport = () => {
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
             </Box>
+            {summaryReport && <Box marginLeft={'30px'}>
+              <Text>Total order {summaryReport.ALL}</Text>
+              <Box display={'flex'}>
+                <Box>
+                  <Text>No Merge {summaryReport.NO_MERGE}</Text>
+                  <Text>Merge With Invoice {summaryReport.MERGE_WITH_INVOICE}</Text>
+                </Box>
+                <Box marginLeft={"35px"}>
+                  <Text>Merge With Order {summaryReport.MERGE_WITH_ORDER}</Text>
+                  <Text>Merged All {summaryReport.ALREADY_MERGED}</Text>
+                </Box>
+              </Box>
+            </Box>}
           </Box>
         </Box>
         <Box display='flex' flexDirection='column'>
@@ -147,15 +177,83 @@ const MonthlyReport = () => {
         </Box>
       </Box>
       <Box marginTop={'25px'}>
-        <Table.ScrollArea borderWidth="1px" rounded="md" height={selectHeight()}>
-          <Table.Root size="md" showColumnBorder stickyHeader>
+        <Table.ScrollArea borderWidth="1px" rounded="md" height={selectHeight()} maxW="100%">
+          <Table.Root size="md" showColumnBorder stickyHeader
+            css={{
+              "& [data-sticky], & [data-column-sticky]": {
+                position: "sticky",
+                background: "white",
+              },
+
+              // default sticky header cells
+              "& thead [data-sticky='header']": {
+                top: 0,
+                zIndex: 5,
+                background: "white",
+              },
+
+              // body sticky columns (above normal cells)
+              "& td[data-column-sticky]": { zIndex: 3, background: "white", },
+
+              // header + sticky column (intersection) must be on top
+              "& thead th[data-column-sticky]": {
+                top: 0,
+                zIndex: 7,
+                background: "white",
+              },
+
+              // left offsets for each frozen column (NOTE: quotes in attribute selectors)
+              [`& [data-column-sticky='column-1']`]: { left: `${L1}px` },
+              [`& [data-column-sticky='column-2']`]: { left: `${L2}px` },
+              [`& [data-column-sticky='column-3']`]: { left: `${L3}px` },
+              [`& [data-column-sticky='column-4']`]: { left: `${L4}px` },
+              [`& [data-column-sticky='column-5']`]: { left: `${L5}px` },
+
+              // optional shadow divider for the last frozen column
+              [`& [data-column-sticky='column-5']::after`]: {
+                content: '""',
+                position: "absolute",
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: "1px",
+                boxShadow: "inset -8px 0 8px -8px rgba(0,0,0,0.15)",
+                pointerEvents: "none",
+              },
+            }}
+          >
             <Table.Header>
-              <Table.Row background={"#F6F6F6"}>
-                <Table.ColumnHeader>Status</Table.ColumnHeader>
-                <Table.ColumnHeader>Plant Code</Table.ColumnHeader>
-                <Table.ColumnHeader>Vendor Code</Table.ColumnHeader>
-                <Table.ColumnHeader>Del No</Table.ColumnHeader>
-                <Table.ColumnHeader>Del Date</Table.ColumnHeader>
+              <Table.Row background={"#F6F6F6"} zIndex={7}>
+                <Table.ColumnHeader
+                  data-sticky="header"
+                  data-column-sticky="column-1"
+                  w={`${COL1W}px`}
+                  minW={`${COL1W}px`}
+                >Status</Table.ColumnHeader>
+                <Table.ColumnHeader
+                  data-sticky="header"
+                  data-column-sticky="column-2"
+                  w={`${COL2W}px`}
+                  minW={`${COL2W}px`}
+                >Plant Code</Table.ColumnHeader>
+                <Table.ColumnHeader
+                  data-sticky="header"
+                  data-column-sticky="column-3"
+                  w={`${COL3W}px`}
+                  minW={`${COL3W}px`}
+                >Vendor Code</Table.ColumnHeader>
+                <Table.ColumnHeader
+                  data-sticky="header"
+                  data-column-sticky="column-4"
+                  w={`${COL4W}px`}
+                  minW={`${COL4W}px`}
+                >Del No</Table.ColumnHeader>
+                <Table.ColumnHeader
+                  data-sticky="header"
+                  data-column-sticky="column-5"
+                  w={`${COL5W}px`}
+                  minW={`${COL5W}px`}
+                >Del Date</Table.ColumnHeader>
                 <Table.ColumnHeader>Del. Period</Table.ColumnHeader>
                 <Table.ColumnHeader>Del Slide Date</Table.ColumnHeader>
                 <Table.ColumnHeader>Del. Slide Period</Table.ColumnHeader>
@@ -195,11 +293,32 @@ const MonthlyReport = () => {
             <Table.Body>
               {reports?.length ? reports.slice(offset * limit, (offset + 1) * limit).map(report =>
                 <Table.Row key={report.id}>
-                  <Table.Cell>{renderStatus(report)}</Table.Cell>
-                  <Table.Cell>{report.plantCode}</Table.Cell>
-                  <Table.Cell>{report.venderCode}</Table.Cell>
-                  <Table.Cell>{report.delNumber}</Table.Cell>
-                  <Table.Cell>{DateTime.fromISO(report.delDate).toFormat('dd/MM/yyyy')} </Table.Cell>
+                  <Table.Cell
+                    data-column-sticky="column-1"
+                    w={`${COL1W}px`}
+                    minW={`${COL1W}px`}
+                  >
+                    {renderStatus(report)}</Table.Cell>
+                  <Table.Cell
+                    data-column-sticky="column-2"
+                    w={`${COL2W}px`}
+                    minW={`${COL2W}px`}
+                  >{report.plantCode}</Table.Cell>
+                  <Table.Cell
+                    data-column-sticky="column-3"
+                    w={`${COL3W}px`}
+                    minW={`${COL3W}px`}
+                  >{report.venderCode}</Table.Cell>
+                  <Table.Cell
+                    data-column-sticky="column-4"
+                    w={`${COL4W}px`}
+                    minW={`${COL4W}px`}
+                  >{report.delNumber}</Table.Cell>
+                  <Table.Cell
+                    data-column-sticky="column-5"
+                    w={`${COL5W}px`}
+                    minW={`${COL5W}px`}
+                  >{DateTime.fromISO(report.delDate).toFormat('dd/MM/yyyy')} </Table.Cell>
                   <Table.Cell>{report.delPeriod}</Table.Cell>
                   <Table.Cell>{report.delSlideDate}</Table.Cell>
                   <Table.Cell>{report.delSlidePeriod}</Table.Cell>

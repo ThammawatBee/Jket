@@ -104,3 +104,19 @@ export const exportBillingTXT = async (billings: string[], type: string) => {
     { responseType: 'blob', });
   return response
 }
+
+export const getReportSummary = async (options?: ListReportOptions) => {
+  try {
+    const response = await axiosInstance.get(`/reports/summary`, { params: options });
+    return response as unknown as {
+      ALL: number;
+      NO_MERGE: number;
+      MERGE_WITH_INVOICE: number;
+      MERGE_WITH_ORDER: number;
+      ALREADY_MERGED: number;
+    };
+  } catch (error) {
+    console.error('Error fetching summary reports:', error);
+    throw error;
+  }
+}

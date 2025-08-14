@@ -137,3 +137,11 @@ export interface ListBillingOptions {
   status?: string
   plantCode?: string
 }
+
+export interface SummaryReport {
+  ALL: number
+  NO_MERGE: number;
+  MERGE_WITH_INVOICE: number;
+  MERGE_WITH_ORDER: number;
+  ALREADY_MERGED: number;
+}

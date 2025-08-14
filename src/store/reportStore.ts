@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware'
 import { DateTime } from 'luxon';
-import { Report } from '../interface/Report'
-import { listReports } from '../service/jket';
+import { Report, SummaryReport } from '../interface/Report'
+import { getReportSummary, listReports } from '../service/jket';
 
 interface ReportState {
   reports: Report[] | null
+  summaryReport: SummaryReport | null
   count: number
   isLoading: boolean
   error: any
@@ -20,6 +21,7 @@ interface ReportState {
   onPageChange: (page: number) => Promise<void>
   onPageSizeChange: (pageSize: number) => Promise<void>
   setPlantCode: (plantCode: string) => void,
+  getSummaryReport: () => void
 }
 
 const useReportStore = create<ReportState>()(
@@ -34,6 +36,7 @@ const useReportStore = create<ReportState>()(
     status: 'ALL',
     search: {},
     plantCode: 'ALL',
+    summaryReport: null,
 
     fetchReports: async (options?: { limit?: number, offset?: number, reset?: boolean, changePage?: boolean }) => {
       set({ isLoading: true, error: null });
@@ -93,6 +96,13 @@ const useReportStore = create<ReportState>()(
       });
       set({ reports: response.reports, count: response.count, offset: 0, limit: pageSize });
     },
+    getSummaryReport: async () => {
+      const monthly = get().monthly
+      const response = await getReportSummary({
+        monthly: DateTime.fromJSDate(monthly).toFormat('MM/yyyy'),
+      });
+      set({ summaryReport: response })
+    }
   }))
 )
 
